@@ -1,0 +1,411 @@
+<__trans_section component="Developer">
+<mt:setvar name="edit_screen" value="1">
+<mt:setvar name="has_listing_screen" value="1">
+<mt:setvarblock name="html_title"><__trans phrase="Schema Builder"></mt:setvarblock>
+<mt:setvarblock name="page_title"><__trans phrase="Schema Builder"></mt:setvarblock>
+
+<mt:setvarblock name="system_msg">
+    <mt:if name="saved">
+        <mtapp:statusmsg
+           id="saved"
+            class="success"
+            rebuild="all">
+            <__trans phrase="Your changes have been saved.">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="error">
+        <mtapp:statusmsg
+            id="generic-error"
+            class="error">
+            <mt:var name="error">
+        </mtapp:statusmsg>
+    </mt:if>
+</mt:setvarblock>
+
+<mt:if name="edit_screen">
+<mt:setvarblock name="related_content">
+<mtapp:widget
+   id="useful-link-widget"
+   class="link-widget"
+   label="<__trans phrase="Links">">
+    <ul>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperGuideURL">" target="_blank"><__trans phrase="__DeveloperGuide"></a></li>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperGuideMTObjectURL">" target="_blank"><__trans phrase="__DeveloperGuideMTObject"></a></li>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperGuideOwnObjectURL">" target="_blank"><__trans phrase="__DeveloperGuideOwnObject"></a></li>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperObjectReferenceURL">" target="_blank"><__trans phrase="__DeveloperMTObjectReference"></a></li>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperListingURL">" target="_blank"><__trans phrase="__DeveloperListing"></a></li>
+    </ul>
+</mtapp:widget>
+</mt:setvarblock>
+</mt:if>
+<mt:setvar name="template_filename" value="your_own_object">
+<mt:include name="include/header.tmpl">
+<form method="post" action="<mt:var name="script_url">" id="create_object" target="export_plugin">
+    <input type="hidden" name="__mode" value="create_your_own_object" id="this_mode" />
+    <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+    <input type="hidden" name="_type" value="export_object_plugin" id="this_key" />
+    <input type="hidden" name="return_args" id="this_return_args" value="<mt:var name="return_args" escape="html">" />
+    <input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+<fieldset>
+    <mtapp:setting
+        id="plugin_id"
+        label_class="top-label"
+        label="<__trans phrase="Plugin ID">"
+        show_hint="0"
+        show_label="0">
+    <table width="100%"><tr>
+    <td style="vertical-align:middle;font-size:200%;">
+    <input type="text" style="width:100%" name="plugin_id" id="plugin_id" placeholder="<__trans phrase="Plugin ID">" class="text" value="<mt:var name="plugin_id" escape="html">" /></id><td style="vertical-align:middle;font-size:200%"> :: </td><td style="vertical-align:middle;font-size:200%"><input type="text" style="width:100%" name="module_id" id="module_id" placeholder="<__trans phrase="Module ID">" class="text" value="<mt:var name="module_id" escape="html">" /></td>
+    </tr></table>
+    </mtapp:setting>
+    <table class="legacy listing-table expanded" id="schema" style="margin-top:2.5em">
+    <thead>
+    <tr>
+        <th style="padding:2px;" class="col head title primary"><span class="col-label"><__trans phrase="Column Name"></span></th>
+        <th style="padding:2px;width:75px" class="col head"><span class="col-label"><__trans phrase="Column Type"></span></th>
+        <th style="padding:2px;width:52px" class="col head"><span class="col-label"><__trans phrase="Length"></span></th>
+        <th style="padding:2px;width:66px" class="col head"><span class="col-label"><__trans phrase="NOT NULL"></span></th>
+        <th style="padding:2px;width:38px" class="col head"><span class="col-label"><__trans phrase="Index"></span></th>
+<MTIgnore>
+        <th style="padding:2px;width:66px" class="col head"><span class="col-label"><__trans phrase="Revision"></span></th>
+</MTIgnore>
+<mt:if name="has_listing_screen">
+        <th style="padding:2px;width:76px" class="col head"><span class="col-label"><__trans phrase="Label"></span></th>
+        <mt:if name="language_id">
+        <th style="padding:2px;width:76px" class="col head"><span class="col-label"><__trans phrase="Localized Label"></span></th>
+        </mt:if>
+        <th style="padding:2px;width:47px" class="col head"><span class="col-label"><__trans phrase="List"></span></th>
+</mt:if>
+        <th style="padding:2px;width:126px" class="col head"><span class="col-label"><__trans phrase="Operation"></span></th>
+    </tr>
+    </thead>
+<tbody id="schema-tbody"><tr><td style="padding:3px;"><input type="text" name="column_name_0" maxlength="20" value="<MTIgnore>blog_id</MTIgnore>" /></td><td style="padding:3px;"><select style="width:76px" name="column_type_0"><option value="string">string</option><option value="integer">integer</option><option value="smallint">smallint</option><option value="float">float</option><option value="text">text</option><option value="datetime">datetime</option><option value="boolean">boolean</option></select></td><td style="padding:3px;"><input type="text" name="column_length_0" maxlength="20" class="num" /></td><td style="padding:3px;"><label><input type="checkbox" name="column_not_null_0" value="1" <MTIgnore>checked="checked"</MTIgnore>> not null</label></td><td style="padding:3px;text-align:center;"><label><input type="checkbox" name="column_index_0" value="1" <MTIgnore>checked="checked"</MTIgnore>> <MTIgnore>index</MTIgnore></label></td><MTIgnore><td style="padding:3px;text-align:center;"><label><input type="checkbox" name="column_revision_0" value="1" checked="checked"></label></td></MTIgnore><mt:if name="has_listing_screen"><td style="padding:3px"><input type="text" name="column_label_0" maxlength="20" /></td><mt:if name="language_id"><td style="padding:3px;"><input type="text" name="column_l_label_0" maxlength="20" /></td></mt:if><td style="padding:3px;text-align:center;"><input type="checkbox" name="column_list_0" value="1" /></td></mt:if><td style="padding:3px;white-space:nowrap"><button onclick="addList(this);return false;" style="font-size:0.9em">+</button> <button onclick="removeList(this);return false;" style="font-size:0.9em">-</button> <button onclick="upList(this);return false;" style="font-size:0.9em">↑</button> <button onclick="downList(this);return false;" style="font-size:0.9em">↓</button></td></tr></tbody></table>
+
+<div style="width:100%;margin-top:1.0em;margin-bottom:2.0em;">
+    <a href="javascript:void(0)" onclick="
+    if ( document.getElementById( 'table_help' ).style.display == 'none' ) {
+        document.getElementById( 'table_help' ).style.display = 'block';
+    } else {
+        document.getElementById( 'table_help' ).style.display = 'none'
+    }
+    "><img src="<$mt:var name="static_uri"$>images/chromeless/nav_help.png" width="6" height="15" alt="<__trans phrase="Help">" /></a>
+    <div id="table_help" style="display:none">
+    <div class="hint" style="width:100%">
+    <__trans phrase="'id' is specified automatically."><br />
+    <__trans phrase="'Length' is valid only on a column of type string.">
+    <mt:if name="has_listing_screen"><br /><__trans phrase="'List' is enabled only when you check 'Listing Screen'."></mt:if>
+    </div>
+    </div>
+</div>
+    <mtapp:setting
+        id="class_label"
+        label_class="top-text"
+        label="<__trans phrase="Meta Information">"
+        show_hint="0"
+        show_label="1">
+    <table class="legacy listing-table expanded" style="width:100%;padding:3px;">
+    <tr>
+    <th style="padding:5px;font-weight:normal;text-align:left;width:120px;"><__trans phrase="Author Information"></th>
+    <td style="padding:3px;">
+    <input type="text" style="width:100%" name="plugin_author_name" id="plugin_author_name" class="text" placeholder="<__trans phrase="Author Name">" value="<mt:var name="author_name" escape="html">" />
+        </td><td style="padding:3px;"><input type="text" style="width:100%" name="plugin_author_link" id="plugin_author_link" class="text" placeholder="<__trans phrase="Author Link">"  value="<mt:var name="author_link" escape="html">" /></td></tr>
+    <tr>
+    <th style="padding:5px;font-weight:normal;text-align:left;width:120px;"><__trans phrase="Description"></th>
+    <td style="padding:3px;">
+    <input type="text" style="width:100%" name="plugin_description" id="plugin_description" class="text full" placeholder="en_us" value="<mt:var name="description" escape="html">" /></td>
+<mt:if name="language_id">
+    <td style="padding:3px;"><input type="text" style="width:100%" name="plugin_description_lang" id="plugin_description_lang" class="text full" placeholder="<mt:var name="language_id">" value="<mt:var name="description_lang" escape="html">" /></td>
+</mt:if>
+    </tr>
+    <tr>
+    <th style="padding:5px;font-weight:normal;text-align:left;width:120px;"><__trans phrase="Version"></th>
+    <td style="padding:3px;">
+    <input type="text" style="width:100%" name="version_number" id="version_number" class="text" placeholder="<__trans phrase="Version">" value="<mt:var name="version_number" escape="html">" /></td>
+        <td style="padding:3px;"><input type="text" style="width:100%" name="schema_version" id="schema_version" class="text" placeholder="<__trans phrase="Schema Version">" value="<mt:var name="schema_version" escape="html">" />
+        </td>
+    </tr>
+<mt:if name="has_listing_screen">
+    <tr>
+    <th style="padding:5px;font-weight:normal;text-align:left;width:120px;"><__trans phrase="Class Label"></th>
+    <td style="padding:3px;">
+    <input type="text" style="width:100%" name="class_label" id="class_label" class="text" placeholder="en_us" value="<mt:var name="class_label" escape="html">" /></td>
+    <mt:if name="language_id">
+        <td style="padding:3px;"><input type="text" style="width:100%" name="class_l_label" id="class_l_label" class="text" placeholder="<mt:var name="language_id">" value="<mt:var name="class_l_label" escape="html">" />
+    </td>
+    </mt:if>
+</tr><tr>
+    <th style="padding:3px;font-weight:normal;text-align:left;width:120px;"><__trans phrase="Class Label Plural"></th>
+<td style="padding:3px;">
+    <input type="text" tyle="width:100%" name="class_label_plural" id="class_label_plural" class="text" placeholder="en_us" value="<mt:var name="class_label_plural" escape="html">" /></td>
+    <mt:if name="language_id">
+    <td style="padding:3px;">
+        <input type="text" tyle="width:100%" name="class_l_label_plural" id="class_l_label_plural" class="text" placeholder="<mt:var name="language_id">" value="<mt:var name="class_l_label_plural" escape="html">" />
+    </td>
+    </mt:if>
+    </tr>
+</mt:if>
+    </table>
+    </mtapp:setting>
+    <mtapp:setting
+        id="object_options"
+        label_class="top-label"
+        label="<__trans phrase="Options">"
+        show_hint="0"
+        show_label="1">
+    <label><input type="checkbox" value="1" name="audit" <mt:if name="audit">checked="checked"</mt:if>> audit</label> &nbsp;
+    <mt:if name="has_listing_screen">
+    <label><input type="checkbox" value="1" name="has_listing" <mt:if name="has_listing">checked="checked"</mt:if>> <__trans phrase="Listing Screen"></label>
+   ( <__trans phrase="Menu Order"> : <input type="text" value="<mt:var name="menu_order" escape="html" default="500">" name="menu_order" class="num" style="font-size:90%"/> )
+    &nbsp;
+    </mt:if>
+    <MTIgnore><label><input type="checkbox" value="1" name="meta"> has_meta</label> &nbsp;</MTIgnore>
+    <MTIgnore><label><input type="checkbox" value="1" name="child_of"> child_of website / blog</label> &nbsp;</MTIgnore>
+    <MTIgnore><label><input type="checkbox" value="1" name="taggable"> taggable</label> &nbsp;</MTIgnore>
+
+<div class="hint" style="width:100%;margin-top:1.0em;margin-bottom:2.5em;">
+    <a href="javascript:void(0)" onclick="
+    if ( document.getElementById( 'options_help' ).style.display == 'none' ) {
+        document.getElementById( 'options_help' ).style.display = 'block';
+    } else {
+        document.getElementById( 'options_help' ).style.display = 'none'
+    }
+    "><img src="<$mt:var name="static_uri"$>images/chromeless/nav_help.png" width="6" height="15" alt="<__trans phrase="Help">" /></a>
+    <div id="options_help" style="display:none">
+<__trans phrase="audit : Automatically add creation and modification timestamps. created_on, created_by, modified_on, modified_by columns.">
+    </div>
+    </div>
+    </mtapp:setting>
+</fieldset>
+
+<script type="text/javascript">
+var CellCount = 1;
+var CreateCount = 1;
+// Edit Existing Schema
+// addList( 'dummy', 'name2', 2, 1, 1, 1, 'Name2', 'Name2(localize)' );
+// addList( 'dummy', 'name', 2, 1, 1, 1, 'Name', 'Name(localize)' );
+// removeList( 'dummy', 1 );
+<mt:loop name="saved_schema">
+addList( 'dummy', '<mt:var name="name">', <mt:var name="type">, <mt:if name="length"><mt:var name="length"><mt:else>null</mt:if>, <mt:if name="not_null">1<mt:else>null</mt:if>, <mt:if name="index">1<mt:else>null</mt:if>, <mt:if name="list">1<mt:else>null</mt:if>, '<mt:var name="label">', '<mt:var name="l_label">' );
+<mt:if name="__last__">removeList( 'dummy', 1 );</mt:if>
+</mt:loop>
+function addList( obj, col, kind, len, nlflag, idx, lst, lbl, l_label ) {
+    var tbody = document.getElementById( 'schema-tbody' );
+    if ( col ) {
+        var tr = tbody.childNodes[ 0 ];
+    } else {
+        var tr = obj.parentNode.parentNode;
+    }
+    // var tr = obj.parentNode.parentNode;
+    // var tr = tbody.childNodes[ 0 ];
+    var list = tbody.childNodes[ 0 ].cloneNode( true );
+    var td = list.childNodes[ 0 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_name_' + CreateCount;
+    if ( col ) {
+        cname.value = col;
+    } else {
+        cname.value = '';
+    }
+    var td = list.childNodes[ 1 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_type_' + CreateCount;
+    if ( kind ) {
+        cname.selectedIndex = kind;
+    }
+    var td = list.childNodes[ 2 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_length_' + CreateCount;
+    if ( len ) {
+        cname.value = len;
+    } else {
+        cname.value = '';
+    }
+    var td = list.childNodes[ 3 ];
+    var cname = td.childNodes[ 0 ].childNodes[ 0 ];
+    cname.name = 'column_not_null_' + CreateCount;
+    if ( nlflag ) {
+        if ( nlflag == 1 ) {
+            cname.checked = true;
+        } else {
+            cname.checked = false;
+        }
+    } else {
+        cname.checked = false;
+    }
+    var td = list.childNodes[ 4 ];
+    var cname = td.childNodes[ 0 ].childNodes[ 0 ];
+    cname.name = 'column_index_' + CreateCount;
+    if ( idx ) {
+        if ( idx == 1 ) {
+            cname.checked = true;
+        } else {
+            cname.checked = false;
+        }
+    } else {
+        cname.checked = false;
+    }
+<mt:if name="has_listing_screen">
+    var td = list.childNodes[ 5 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_label_' + CreateCount;
+    if ( lbl ) {
+        cname.value = lbl;
+    } else {
+        cname.value = '';
+    }
+<mt:if name="language_id">
+    var td = list.childNodes[ 6 ];
+    var cname = td.childNodes[ 0 ];
+    if ( l_label ) {
+        cname.value = l_label;
+    } else {
+        cname.value = '';
+    }
+    cname.name = 'column_l_label_' + CreateCount;
+    var td = list.childNodes[ 7 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_list_' + CreateCount;
+    if ( lst ) {
+        if ( lst == 1 ) {
+            cname.checked = true;
+        } else {
+            cname.checked = false;
+        }
+    } else {
+        cname.checked = false;
+    }
+<mt:else>
+    var td = list.childNodes[ 6 ];
+    var cname = td.childNodes[ 0 ];
+    cname.name = 'column_list_' + CreateCount;
+    if ( lst ) {
+        if ( lst == 1 ) {
+            cname.checked = true;
+        } else {
+            cname.checked = false;
+        }
+    } else {
+        cname.checked = false;
+    }
+</mt:if>
+</mt:if>
+    tbody.insertBefore( list, tr.nextSibling );
+    CellCount++;
+    CreateCount++;
+    return false;
+}
+function removeList( obj, col ) {
+    if ( CellCount > 1 ) {
+        var tbody = document.getElementById( 'schema-tbody' );
+        if ( col ) {
+            var tr = tbody.childNodes[ 0 ];
+        } else {
+            var tr = obj.parentNode.parentNode;
+        }
+        tbody.removeChild(tr);
+        CellCount--;
+    }
+    return false;
+}
+function upList( obj ) {
+    var tbody = document.getElementById( 'schema-tbody' );
+    var tr = obj.parentNode.parentNode;
+    try {
+        if( tr.previousSibling.nodeName == 'TR' ) {
+            tbody.insertBefore( tr, tr.previousSibling );
+        }
+    } catch ( e ) {
+    }
+    return false;
+}
+function downList( obj ) {
+    var tbody = document.getElementById( 'schema-tbody' );
+    var tr = obj.parentNode.parentNode;
+    try {
+        if( tr.nextSibling.nodeName == 'TR' ){
+            tbody.insertBefore( tr.nextSibling, tr );
+        }
+    } catch ( e ){
+    }
+    return false;
+}
+function __export () {
+    return true;
+}
+</script>
+
+    <button
+        type="submit"
+        accesskey="s"
+        onclick="
+        if ( document.getElementById( 'plugin_id' ).value == '' ) {
+            alert( '<__trans phrase="Plugin ID is required.">' );
+            document.getElementById( 'plugin_id' ).focus();
+            return false;
+        }
+        if ( document.getElementById( 'module_id' ).value == '' ) {
+            alert( '<__trans phrase="Module ID is required.">' );
+            document.getElementById( 'module_id' ).focus();
+            return false;
+        }
+        getByID( 'this_mode' ).value='create_your_own_object';
+        document.getElementById( 'create_object' ).target = '_self';
+        document.getElementById( 'this_key' ).value = 'save_schema';
+        document.getElementById( 'create_object' ).submit();
+        return false;
+        "
+        title="<__trans phrase="Save this Custom Schema (s)">"
+        class="save action primary-button primary button"
+        ><__trans phrase="Save"></button>
+    <button
+        onclick="
+        if ( document.getElementById( 'plugin_id' ).value == '' ) {
+            alert( '<__trans phrase="Plugin ID is required.">' );
+            document.getElementById( 'plugin_id' ).focus();
+            return false;
+        }
+        if ( document.getElementById( 'module_id' ).value == '' ) {
+            alert( '<__trans phrase="Module ID is required.">' );
+            document.getElementById( 'module_id' ).focus();
+            return false;
+        }
+        if ( window.confirm( '<__trans phrase="Are you sure you want to export plugin?">' ) ) {
+        } else {
+            return false;
+        }
+        getByID( 'this_mode' ).value='create_your_own_object';
+        document.getElementById( 'create_object' ).target = 'export_plugin';
+        document.getElementById( 'this_key' ).value = 'export_object_plugin';
+        window.open('<mt:var name="script_url">?__mode=export_plugin', 'export_plugin', 'width=660, height=360, menubar=no, toolbar=no, scrollbars=no');
+        setTimeout( function(){  document.getElementById( 'create_object' ).submit(); }, 2200 );
+        return false;
+        "
+        type="submit"
+        accesskey="s"
+        title="<__trans phrase="Export this Plugin (s)">"
+        class="primary action button"
+        ><__trans phrase="Export"></button>
+    <mt:if name="id">
+    <button
+        onclick="
+        if ( window.confirm( '<__trans phrase="Are you sure you want to remove this Custom Schema?">' ) ) {
+            getByID( 'this_mode' ).value='delete';
+            document.getElementById( 'this_key' ).value = 'customschema';
+            document.getElementById( 'create_object' ).target = '_self';
+            getByID( 'this_return_args' ).value='__mode=list&amp;_type=customschema&amp;blog_id=<mt:var name="blog_id">';
+            this.form.submit();
+        } else {
+            return false;
+        }
+        "
+        type="submit"
+        accesskey="x"
+        title="<__trans phrase="Delete this Custom Schema (x)">"
+        class="delete action button"
+        ><__trans phrase="Delete"></button>
+    </mt:if>
+
+</fieldset>
+</form>
+<mt:include name="include/footer.tmpl">
+</__trans_section>

@@ -1,0 +1,8 @@
+    $mt = MT::get_instance();
+    $ctx =& $mt->context();
+    $ctx->__stash[ 'vars' ][ 'modifier_text' ] = $text;
+    $ctx->__stash[ 'vars' ][ 'modifier_arg' ] = $arg;
+    $src = $ctx->stash( 'developer_modifier_modifier_id_<ID>' );
+    require_once( 'modifier.mteval.php' );
+    $contents = smarty_modifier_mteval( $src, TRUE );
+    return $contents;

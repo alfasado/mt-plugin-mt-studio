@@ -1,0 +1,547 @@
+<__trans_section component="Developer">
+<mt:setvar name="edit_screen" value="1">
+<mt:setvar name="use_revision" value="1">
+<mt:setvarblock name="page_title">
+  <mt:if name="id">
+<__trans phrase="Edit Alt Template">
+  <mt:else>
+<__trans phrase="Create Alt Template">
+  </mt:if>
+</mt:setvarblock>
+
+<mt:setvarblock name="html_title"><mt:if name="id"><mt:if name="name"><mt:var name="name" escape="html"><mt:else><mt:var name="template_name"></mt:if> - <__trans phrase="Edit Alt Template"><mt:else><__trans phrase="Create Alt Template"></mt:if></mt:setvarblock>
+
+<mt:var name="position_actions_bottom" value="1">
+<mt:setvarblock name="system_msg">
+<mt:if name="recovered_object">
+  <mtapp:statusmsg
+     id="recovered-object"
+     class="success">
+    <__trans phrase="You have successfully recovered your saved [_1]." params="<mt:var name="object_label">">
+  </mtapp:statusmsg>
+</mt:if>
+<mt:if name="recovered_failed">
+  <mtapp:statusmsg
+     id="recovered-failed"
+     class="error"
+     can_close="0">
+    <__trans phrase="An error occurred while trying to recover your saved [_1]." params="<mt:var name="object_label">">
+  </mtapp:statusmsg>
+</mt:if>
+<mt:if name="loaded_revision">
+  <mtapp:statusmsg
+     id="loaded_revision"
+     class="info">
+    <__trans phrase="Restored revision (Date:[_1])." params="<$mt:var name="rev_date" escape="html"$>">
+  </mtapp:statusmsg>
+</mt:if>
+<mt:if name="saved">
+  <mt:if name="error">
+  <mtapp:statusmsg
+     id="generic-error"
+     class="error"
+     can_close="0">
+    <__trans phrase="Your changes have been saved.">
+      <mt:var name="error">
+  </mtapp:statusmsg>
+  <mt:else>
+  <mtapp:statusmsg
+     id="saved"
+     class="success">
+    <__trans phrase="Your changes have been saved.">
+  </mtapp:statusmsg>
+  </mt:if>
+<mt:else>
+  <mt:if name="error">
+  <mtapp:statusmsg
+     id="generic-error"
+     class="error"
+     can_close="0">
+    <mt:var name="error">
+  </mtapp:statusmsg>
+  </mt:if>
+</mt:if>
+<mt:if name="message">
+  <mtapp:statusmsg
+     id="message"
+     class="alert">
+    <mt:var name="message">
+  </mtapp:statusmsg>
+</mt:if>
+<mt:if name="saved_rebuild">
+  <mtapp:statusmsg
+     id="saved-rebuild"
+     class="success">
+    <__trans phrase="Your [_1] has been published." params="<mt:var name="name" escape="html" escape="html">">
+  </mtapp:statusmsg>
+</mt:if>
+</mt:setvarblock>
+
+<mt:setvarblock name="related_content">
+<mt:if name="use_revision">
+<mtapp:widget
+   id="template-status-widget"
+   class="status-widget"
+   label="<__trans phrase="Status">">
+  <mt:if name="new_object">
+    <p class="zero-state"><__trans phrase="New Alt Template"></p>
+  <mt:else>
+    <div class="revision-info">
+    <mt:if name="rev_date">
+      <p><__trans phrase="Revision: <strong>[_1]</strong>" params="<mt:var name="rev_date" escape="html">"></p>
+      <a href="<mt:var name="script_url">?__mode=list_revision&_type=<mt:var name="object_type" default="entry">&id=<$mt:var name="id" escape="html"$>&blog_id=<$mt:var name="blog_id"$>&r=<mt:var name="rev_number" escape="html">" class="mt-open-dialog" title="<__trans phrase="View revisions of this alt template">"><__trans phrase="View revisions"></a>
+    <mt:else>
+      <p class="zero-state"><__trans phrase="No revision(s) associated with this alt template"></p>
+    </mt:if>
+    </div>
+  </mt:if>
+</mtapp:widget>
+</mt:if>
+
+<MTIgnore>
+<mtapp:widget
+   id="useful-links"
+   label="<__trans phrase="Useful Links">">
+  <ul>
+  </ul>
+</mtapp:widget>
+</MTIgnore>
+
+<mtapp:widget
+   id="tag-list"
+   class="hidden"
+   label="<__trans phrase="Template Tag Docs">"
+   label_link="$link_doc">
+  <div id="tag-list-inner">
+  </div>
+</mtapp:widget>
+
+<mtapp:widget
+   id="badtag-list"
+   class="hidden"
+   label="<__trans phrase="Unrecognized Tags">">
+  <div id="badtag-list-inner">
+  </div>
+</mtapp:widget>
+
+<$MTApp:PageActions from="edit_template"$>
+</mt:setvarblock>
+
+<mt:setvartemplate name="action_buttons">
+<mt:if name="new_object">
+  <button
+     onclick="return validate(this.form);"
+     type="submit"
+     accesskey="s"
+     tabindex="12"
+     title="<__trans phrase="Save (s)">"
+     class="save action primary button">
+    <__trans phrase="Save"></button>
+<mt:else>
+  <button
+     onclick="return validate(this.form);"
+     type="submit"
+     accesskey="s"
+     tabindex="12"
+     title="<__trans phrase="Save Changes (s)">"
+     class="save action primary button">
+    <__trans phrase="Save Changes"></button>
+</mt:if>
+</mt:setvartemplate>
+
+<mt:setvarblock name="html_head" append="1">
+<script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var tag_inserts = {};
+
+if ( !window.Editor )
+    Editor = { strings: {} };
+Editor.strings.unsavedChanges = '<__trans phrase="You have unsaved changes to this template that will be lost." escape="js">'; 
+
+var fieldStorage = {};
+var dirty = false;
+function setDirty () {
+    log.warn('deprecated function setDirty(), call app.setDirty instead');
+    app.setDirty();
+}
+function clearDirty () {
+    log.warn('deprecated function clearDirty(), call app.clearDirty instead');
+    app.clearDirty();
+}
+
+var tag_docs = <tmpl_var name="tag_docs" to_json="1">;
+
+function documentTags( useTextInput ) {
+    // scan text of editor for tags
+    var str;
+    var area = DOM.getElement('text');
+    str = area.value;
+    
+    if ( !defined( str ) )
+        str = '';
+
+    // clear any ignore blocks
+    var re = new RegExp('(<m' + 't:?ignore([^>])*?>)[\\S\\s]*?</mt:?ignore>',
+        'gi');
+    str = str.replace(re, '$1');
+    // scan template string for MT tags and build
+    // a hash of unique tag names
+    var tags = {};
+    var matches = str.match(/<\$?[mM][tT]:?[^\s>]+/g);
+    if (matches) {
+        for (var i = 0; i < matches.length; i++ ) {
+            var orig_tag = matches[i];
+            if (orig_tag.match(/^<\$/)) {
+                if (!orig_tag.match(/\$$/))
+                    orig_tag += '$';
+            }
+            orig_tag = orig_tag.replace(/^</, '&lt;');
+            orig_tag += '&gt;';
+            var tag = matches[i].replace(/^<\$?[mM][tT]:?/, '');
+            tag = tag.replace(/\$$/, '');
+            tags[dirify(tag.toLowerCase())] = orig_tag;
+        }
+    }
+
+    // construct a set of bullets for all discovered tags
+    // separate into valid/invalid lists
+    var sorted_tags = [];
+    for ( var t in tags ) {
+        if ( !tags.hasOwnProperty( t ) )
+            continue;
+        sorted_tags.push(t);
+    }
+    sorted_tags.sort();
+    var list = '';
+    var bad_list = '';
+    for ( var i = 0; i < sorted_tags.length; i++ ) {
+        var t = sorted_tags[i];
+        var url = tagDocURL( t );
+        var tag_name = tags[t];
+        if (!url) {
+            bad_list = bad_list + "<li>" + tag_name + "</li>";
+            continue;
+        }
+        var link = "<a target=\"mt_docs\" href=\"" + url + "\">" + tag_name + "</a>";
+        list = list + "<li>" + link + "</li>";
+    }
+
+    // if we found tags to list, display the tag-list widget, otherwise
+    // hide it
+    if (list != '') {
+        list = '<ul>' + list + '</ul>';
+        DOM.getElement("tag-list-inner").innerHTML = list;
+        DOM.removeClassName("tag-list", "hidden");
+    } else {
+        DOM.addClassName("tag-list", "hidden");
+    }
+    // if we found invalid tags, display them in badtag-list, otherwise
+    // hide it
+    if (bad_list != '') {
+        bad_list = '<ul>' + bad_list + '</ul>';
+        DOM.getElement("badtag-list-inner").innerHTML = bad_list;
+        DOM.removeClassName("badtag-list", "hidden");
+    } else {
+        DOM.addClassName("badtag-list", "hidden");
+    }
+}
+
+function tagDocURL(name) {
+    var re = new RegExp('(?:^|,)' + name + '\\??(?:,|$)', 'i');
+    for ( var u in tag_docs ) {
+        if ( !tag_docs.hasOwnProperty(u) ) continue;
+        var m;
+        if (m = tag_docs[u].match(re))
+            return u.replace(/\%t/, name);
+    }
+    return;
+}
+
+function archiveFileSelect(sel) {
+    var fld = sel.name;
+    fld = fld.replace(/sel/, 'tmpl');
+    var edit = getByID(fld);
+    var map = sel.options[sel.selectedIndex].value;
+    if (map == '') {
+        DOM.addClassName(sel, "hidden");
+        DOM.removeClassName(edit, "hidden");
+        edit.focus();
+    } else {
+        edit.value = map;
+    }
+}
+
+function setRebuild(f) {
+    f['rebuild'].value = 'Y';
+}
+
+function validate (f, rebuild) {
+    if (f.name && !f.name.value) {
+        alert('<__trans phrase="You must set the Template Name." escape="js">');
+        return false;
+    }
+    if (f.outfile && !f.outfile.value) {
+        alert('<__trans phrase="You must set the template Output File." escape="js">');
+        return false;
+    }
+
+    app.clearDirty();
+    var area = DOM.getElement('text');
+    var str = area.value;
+    if ( !defined( str ) ) str = '';
+    str = str.replace(/[\0-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+    area.value = str;
+    str = editor.getValue();
+    if ( !defined( str ) ) str = '';
+    str = str.replace(/[\0-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+    editor.setValue(str);
+    if (rebuild) setRebuild(f);
+    return true;
+}
+    Template.templates.autoSave = '<mt:section encode_js="1">
+    [# if ( saving ) { #]
+        [#= trans("Auto-saving..." ) #]
+    [# } else { #]
+        [#= trans("Last auto-save at [_1]:[_2]:[_3]", hh, mm, ss ) #]
+    [# } #]
+    </mt:section>';
+/* ]]> */
+</script>
+</mt:setvarblock>
+
+<mt:setvarblock name="html_body" append="1">
+<mt:if name="dirty">
+  <script type="text/javascript">
+  /* <![CDATA[ */
+    MT.App.dirty = true;
+  /* ]]> */
+  </script>
+</mt:if>
+</mt:setvarblock>
+
+<mt:include name="include/header.tmpl" id="header_include">
+
+<form name="template-listing-form" id="template-listing-form" method="post" action="<mt:var name="script_url">">
+  <input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+  <input type="hidden" name="__mode" value="save" />
+  <input type="hidden" name="_type" value="alttemplate" />
+<mt:if name="use_revision">
+  <input type="hidden" name="save_revision" id="save_revision" value="1" />
+  <input type="hidden" name="current_revision" id="current_revision" value="<mt:ifNonEmpty name="current_revision"><mt:var name="current_revision"><mt:else>0</mt:IfNonEmpty>" />
+</mt:if>
+  <input type="hidden" name="return_args" value="<mt:var name="return_args" escape="html">" />
+  <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+
+  <mtapp:setting
+     id="title"
+     label="<__trans phrase="Template Name">"
+     label_class="no-header">
+    <input type="text" name="name" id="title" class="title text full" tabindex="1" value="<mt:var name="name" escape="html">" placeholder="<__trans phrase="Alt Template Name">"  maxlength="255" mt:watch-change="1" />
+  </mtapp:setting>
+
+  <mtapp:setting
+     id="template-body"
+     label="$template_name"
+     label_class="no-header">
+    <div id="template-editor-toolbar" class="template editor-toolbar toolbar">
+      <button type="button" id="syntaxon" class="command-highlight-on toolbar button active" title="<__trans phrase="Syntax highlighting On">"><span class="button-label"><__trans phrase="Syntax highlighting On"></span></button><button type="button" id="syntaxoff" class="command-highlight-off toolbar button" title="<__trans phrase="Syntax highlighting Off">"><span class="button-label"><__trans phrase="Syntax highlighting Off"></span></button>
+    </div>
+    <div id="textarea-enclosure" class="editor">
+      <textarea name="text" id="text" class="monospace text full" tabindex="3" spellcheck="false" mt:watch-change="1" mt:editor="codemirror" mt:editor-options="lang:<mt:var name="template_lang"> autocomplete:off" ><mt:var name="text" escape="html"></textarea>
+    </div>
+  </mtapp:setting>
+
+<mt:if name="error">
+  <$mt:setvar name="template_options_active" value="1"$>
+<mt:else name="id">
+  <$mt:setvar name="template_options_active" value="0"$>
+<mt:else>
+  <$mt:setvar name="template_options_active" value="1"$>
+</mt:if>
+
+  <div id="template-options"<mt:if name="template_options_active"> class="active"</mt:if>>
+    <div id="template-options-header" class="line">
+      <div class="template-options-toggle">
+        <a href="javascript:void(0);" class="icon-left icon-spinner" onclick="return toggleActive('template-options');"><__trans phrase="Template Options"></a>
+      </div>
+    </div>
+    <div id="template-options-content">
+      <mtapp:setting
+         id="app_ref"
+         label="<__trans phrase="Application">"
+         label_class="top-label">
+        <select name="app_ref" id="app_ref" mt:watch-change="1">
+          <mt:loop name="apps_loop">
+                <option value="<mt:var name="app_name">" <mt:if name="app_ref" eq="$app_name">selected="selected"</mt:if>><mt:var name="label"></option>
+          </mt:loop>
+        </select>
+      </mtapp:setting>
+
+    <div id="template-options-content">
+      <mtapp:setting
+         id="app_ref"
+         label="<__trans phrase="Template">"
+         label_class="top-label">
+        <input type="text" name="template" id="template" class="text" tabindex="5" value="<mt:var name="template" escape="html">" mt:watch-change="1" />
+      </mtapp:setting>
+    </div>
+
+    <div id="template-options-content">
+      <mtapp:setting
+         id="status"
+         label="<__trans phrase="Status">"
+         label_class="top-label">
+        <select name="status" id="status" mt:watch-change="1">
+            <option value="1" <mt:if name="status" eq="1">selected="selected"</mt:if>><__trans phrase="Disabled"></option>
+            <option value="2" <mt:if name="status" eq="2">selected="selected"</mt:if>><__trans phrase="Enabled"></option>
+        </select>
+      </mtapp:setting>
+    </div>
+
+    </div>
+  </div>
+
+<mt:if name="use_revision">
+  <mtapp:setting
+     id="revision-note"
+     label="<__trans phrase="Change note">"
+     label_class="top-label">
+    <input type="text" name="revision-note" id="revision-note" class="text full" value="<mt:var name="revision-note" escape="html">"<mt:if name="save_revision" eq="0"> style="display:none"</mt:if> />
+  </mtapp:setting>
+</mt:if>
+
+  <mt:include name="include/actions_bar.tmpl" bar_position="bottom" hide_pager="1">
+
+  <div id="autosave-notification-<$mt:var name="bar_position" escape="html" default="top"$>" class="autosave-notification"></div>
+</form>
+
+<form name="archive_map_form" method="post" action="<mt:var name="script_url">">
+  <input type="hidden" name="__mode" value="" />
+  <input type="hidden" name="_type" value="<mt:var name="object_type">" />
+  <input type="hidden" name="blog_id" value="<mt:var name="blog_id">" />
+  <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+</form>
+
+<script type="text/javascript" src="<$mt:var name="static_uri"$>codemirror/lib/codemirror.js?v=<mt:var name="mt_version_id" escape="URL">"></script>
+<link rel="stylesheet" href="<$mt:var name="static_uri"$>codemirror/lib/codemirror.css">
+
+<script type="text/javascript" src="<$mt:var name="static_uri"$>codemirror/mt/xml.js?v=<mt:var name="mt_version_id" escape="URL">"></script>
+<script type="text/javascript" src="<$mt:var name="static_uri"$>codemirror/mt/javascript.js?v=<mt:var name="mt_version_id" escape="URL">"></script>
+<script type="text/javascript" src="<$mt:var name="static_uri"$>codemirror/mt/css.js?v=<mt:var name="mt_version_id" escape="URL">"></script>
+<script type="text/javascript" src="<$mt:var name="static_uri"$>codemirror/mt/htmlmixed.js?v=<mt:var name="mt_version_id" escape="URL">"></script>
+<link rel="stylesheet" href="<$mt:var name="static_uri"$>codemirror/mt/mt.css">
+
+
+<script type="text/javascript">
+/* <![CDATA[ */
+App.singletonConstructor =
+MT.App = new Class( MT.App, {
+
+    initComponents: function() {
+       arguments.callee.applySuper( this, arguments );
+       documentTags( true );
+    },
+
+    autoSave: function() {
+        arguments.callee.applySuper( this, arguments );
+        documentTags();
+    }
+
+} );
+
+var options = jQuery('#text').attr('mt:editor-options');
+var editor_params = {
+    lineNumbers: true,
+    lineWrapping: false,
+    tabMode: "default",
+    indentUnit: 0,
+    pollForIME: true,
+    mode: "text/html"
+};
+if (options.match('lang:css')) {
+    editor_params['mode'] = 'text/javascript';
+} else if (options.match('lang:javascript')) {
+    editor_params['mode'] = 'text/css';
+}
+
+var editor = CodeMirror.fromTextArea(jQuery('#text').get(0), editor_params);
+
+function syncEditor() {
+    var wrapper = editor.getWrapperElement();
+    if ( jQuery(wrapper).css('display') == 'none') {
+        editor.setValue(jQuery('#text').val());
+    } else {
+        jQuery('#text').val(editor.getValue());
+    }
+}
+
+function saveTemplatePrefs( sync ) {
+  jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+    async: false,
+    url: '<mt:var name="script_url">',
+    dataType: 'json',
+    data: {
+      __mode: 'save_template_prefs',
+      blog_id: <mt:if name="blog_id"><mt:var name="blog_id"><mt:else>0</mt:if>,
+      syntax_highlight: sync,
+      magic_token: '<mt:var name="magic_token">'
+    }
+  });
+}
+
+/* ]]> */
+</script>
+<mt:setvarblock name="jq_js_include" append="1">
+    jQuery('button.save, button.publish').click(function() {
+        syncEditor();
+        jQuery('form#template-listing-form > input[name=__mode]').val('save');
+  <mt:if name="config.previewinnewwindow">
+        jQuery('form#template-listing-form').removeAttr('target');
+        jQuery('button.save').attr('disabled', 'disabled');
+        jQuery('button.publish').attr('disabled', 'disabled');
+        jQuery('form#template-listing-form').submit();
+  </mt:if>
+    });
+    jQuery('button.preview').click(function() {
+        syncEditor();
+        jQuery('form#template-listing-form > input[name=__mode]').val('preview_template');
+  <mt:if name="config.previewinnewwindow">
+        jQuery('form#template-listing-form').attr('target', '_brank');
+  </mt:if>
+    });
+    jQuery('input#save_revision').click(function() {
+        jQuery('input#revision-note').toggle();
+    });
+    jQuery('button.mt-template-listing-form-action').mtDoPluginAction({
+        plural: 'Templates',
+        phrase: 'to act upon'
+    });
+    jQuery('#syntaxon, #syntaxoff').click(function() {
+        syncEditor();
+        var wrapper = editor.getWrapperElement();
+        jQuery('#syntaxon, #syntaxoff').removeClass('active');
+        var id = jQuery(this).addClass('active').attr('id');
+        var syntax;
+        if (id == 'syntaxon') {
+            jQuery('#text').hide();
+            jQuery(wrapper).show();
+            syntax = 'on';
+        } else {
+            jQuery('#text').show();
+            jQuery(wrapper).hide();
+            syntax = 'off';
+        }
+        saveTemplatePrefs( syntax );
+        return false;
+    });
+    jQuery('#syntax<mt:var name="disp_prefs_syntax" default="on">').click();
+    jQuery(window).bind('pre_autosave', function(){
+        syncEditor();
+    });
+
+</mt:setvarblock>
+<mt:include name="include/footer.tmpl">
+</__trans_section>

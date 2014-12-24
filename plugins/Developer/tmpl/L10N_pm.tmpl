@@ -1,0 +1,9 @@
+package <mt:var name="plugin_id">::L10N<mt:if name="my_language_id">::<mt:var name="my_language_id"></mt:if>;
+use strict;
+use base '<mt:if name="my_language_id"><mt:var name="plugin_id">::L10N<mt:else>MT::Plugin::L10N</mt:if>';
+<mt:if name="my_language_id">
+use vars qw( %Lexicon );
+
+our %Lexicon = (<mt:var name="lexicon">);
+</mt:if>
+1;

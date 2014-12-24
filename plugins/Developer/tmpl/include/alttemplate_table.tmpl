@@ -1,0 +1,31 @@
+<__trans_section component="Developer">
+<mt:setvarblock name="list_id"><mt:var name="object_type">-listing</mt:setvarblock>
+<mt:setvarblock name="table_header">
+    <tr>
+        <th class="col head title primary"><span class="col-label"><__trans phrase="Name"></span></th>
+        <th class="col head"><span class="col-label"><__trans phrase="Application"></span></th>
+        <th class="col head"><span class="col-label"><__trans phrase="Template"></span></th>
+        <th class="col head"><span class="col-label"><__trans phrase="Status"></span></th>
+        <th class="col head"><span class="col-label"><__trans phrase="Author"></span></th>
+    </tr>
+</mt:setvarblock>
+
+<mtapp:listing id="$list_id">
+    <mt:if __first__>
+        <thead><mt:var name="table_header"></thead>
+        <tfoot><mt:var name="table_header"></tfoot>
+        <tbody>
+    </mt:if>
+    <tr id="tr-<mt:var name="id">" class="<mt:if name="__odd__">odd<mt:else>even</mt:if>">
+        <td class="name col"><a href="<mt:var name="script_url">?__mode=view&_type=alttemplate&id=<mt:var name="id">"><mt:var name="name" escape="html"></a></td>
+        <td class="priority col"><mt:var name="app_ref" escape="html"></td>
+        <td class="nextrun_on col"><mt:var name="template" escape="html"></td>
+        <td class="status col"><mt:var name="status" escape="html"></td>
+        <td class="author col"><mt:var name="_author_name" escape="html"></td>
+        </td>
+    </tr>
+    <mt:if __last__>
+            </tbody>
+    </mt:if>
+</mtapp:listing>
+</__trans_section>

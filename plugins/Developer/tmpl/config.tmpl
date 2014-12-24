@@ -1,0 +1,195 @@
+<mt:if name="config.AllowPHPScript">
+<mtapp:setting
+    id="developer_php_path"
+    label="<__trans phrase="PHP Path">">
+<ul><li>
+<input type="text" id="developer_php_path" name="developer_php_path" style="width:100%" value="<mt:var name="developer_php_path" escape="html">" />
+</li></ul>
+</mtapp:setting>
+</mt:if>
+<mtapp:setting
+    id="developer_recover_password"
+    label="<__trans phrase="Password for recovery">">
+<ul><li>
+<input type="password" id="developer_recover_password" name="developer_recover_password" style="width:100%" value="<mt:var name="developer_recover_password" escape="html">" />
+<div class="hint" style="width:100%"><__trans phrase="To set status to all Custom Handlers and Alt Templates, Access to [_1]?__mode=disable_mtstudio&amp;password=&lt;Your Password&gt;." params="<MTAdminScript>"></div>
+</li></ul>
+</mtapp:setting>
+
+<h2><__trans phrase="Application Settings"></h2>
+<mtapp:setting
+    id="developer_signup_notify_to"
+    label="<__trans phrase="Sign Up Notify Send To">">
+<ul><li><input type="text" id="developer_signup_notify_to" name="developer_signup_notify_to" style="width:100%" value="<mt:var name="developer_signup_notify_to" escape="html">" /></li>
+<li style="margin-top:1em"><a onclick="
+if ( window.confirm( '<__trans phrase="Are you sure you want to install member site\'s alternative templates?">' ) ) {
+    return true;
+} else {
+    return false;
+}"
+href="<MTAdminScript>?__mode=install_sign_in_template&amp;magic_token=<mt:MagicToken escape="html">"><__trans phrase="Install Member Site's Templates"></a>
+</li></ul>
+</mtapp:setting>
+<h2><__trans phrase="Custom Handler Settings"></h2>
+<mtapp:setting
+    id="developer_preview_php"
+    label="<__trans phrase="PHP Preview URL">">
+<ul><li>
+<input type="text" id="developer_preview_php" name="developer_preview_php" style="width:100%" value="<mt:var name="developer_preview_php" escape="html">" />
+</li></ul>
+</mtapp:setting>
+
+<mtapp:setting
+    id="developer_default_mtmljob_status"
+    label="<__trans phrase="Default Status">">
+    <ul><li>
+        <select name="developer_default_mtmljob_status">
+            <option value="1" <mt:if name="developer_default_mtmljob_status" eq="1">selected="selected"</mt:if>><__trans phrase="Disabled"></option>
+            <option value="2" <mt:if name="developer_default_mtmljob_status" eq="2">selected="selected"</mt:if>><__trans phrase="Enabled"></option>
+        </select>
+    </li></ul>
+</mtapp:setting>
+
+<mt:if name="config.AllowPerlScript">
+<mtapp:setting
+    id="developer_default_evalscript"
+    label="<__trans phrase="Eval Code">">
+<ul><li><label>
+<input type="checkbox" id="developer_default_evalscript" name="developer_default_evalscript" value="1" <mt:if name="developer_default_evalscript">checked="checked"</mt:if> /> <__trans phrase="Permit as default setting"></label>
+</li></ul>
+</mtapp:setting>
+</mt:if>
+<mtapp:setting
+    id="developer_job_use_ace"
+    label="<__trans phrase="Using Ace Code Editor">">
+<ul><li><label><input type="checkbox" id="developer_job_use_ace" name="developer_job_use_ace" value="1" <mt:if name="developer_job_use_ace">checked="checked"</mt:if> onchange="
+if ( this.checked ) {
+    document.getElementById( 'd_ace_editor_settings' ).style.display = 'block';
+} else {
+    document.getElementById( 'd_ace_editor_settings' ).style.display = 'none';
+};
+" /> <__trans phrase="Enabled"></label>
+</li></ul>
+</mtapp:setting>
+
+<div id="d_ace_editor_settings"
+style="display:<mt:if name="developer_job_use_ace">block;<mt:else>none;</mt:if>"
+>
+<mtapp:setting
+    id="developer_ace_theme"
+    label="<__trans phrase="Theme">">
+<ul><li>
+   <select name="developer_ace_theme">
+       <option value="cobalt" <mt:if name="developer_ace_theme" eq="cobalt">selected="selected"</mt:if>>Cobalt</option>
+       <option value="terminal" <mt:if name="developer_ace_theme" eq="terminal">selected="selected"</mt:if>>Terminal</option>
+       <option value="github" <mt:if name="developer_ace_theme" eq="github">selected="selected"</mt:if>>GitHub</option>
+       <option value="xcode" <mt:if name="developer_ace_theme" eq="xcode">selected="selected"</mt:if>>Xcode</option>
+   </select>
+</li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_ace_font_size"
+    label="<__trans phrase="Font Size">">
+<ul><li>
+   <select name="developer_ace_font_size">
+       <option value="12px" <mt:if name="developer_ace_font_size" eq="12px">selected="selected"</mt:if>>12px</option>
+       <option value="14px" <mt:if name="developer_ace_font_size" eq="14px">selected="selected"</mt:if>>14px</option>
+       <option value="16px" <mt:if name="developer_ace_font_size" eq="16px">selected="selected"</mt:if>>16px</option>
+       <option value="18px" <mt:if name="developer_ace_font_size" eq="18px">selected="selected"</mt:if>>18px</option>
+   </select>
+</li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_ace_editor_height"
+    label="<__trans phrase="Editor Height">">
+<ul><li>
+   <select name="developer_ace_editor_height">
+       <option value="300px" <mt:if name="developer_ace_editor_height" eq="300px">selected="selected"</mt:if>>300px</option>
+       <option value="500px" <mt:if name="developer_ace_editor_height" eq="500px">selected="selected"</mt:if>>500px</option>
+       <option value="700px" <mt:if name="developer_ace_editor_height" eq="700px">selected="selected"</mt:if>>700px</option>
+       <option value="900px" <mt:if name="developer_ace_editor_height" eq="900px">selected="selected"</mt:if>>900px</option>
+   </select>
+</li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_ace_mtml_mode"
+    label="<__trans phrase="MTML Mode">">
+<ul><li>
+   <select name="developer_ace_mtml_mode">
+       <option value="xml" <mt:if name="developer_ace_mtml_mode" eq="xml">selected="selected"</mt:if>>XML</option>
+       <option value="plain_text" <mt:if name="developer_ace_mtml_mode" eq="plain_text">selected="selected"</mt:if>>Plain Text</option>
+   </select>
+</li></ul>
+</mtapp:setting>
+
+<mtapp:setting
+    id="require_change_note"
+    label="<__trans phrase="Change note">">
+<ul><li><label>
+<input type="checkbox" id="require_change_note" name="require_change_note" value="1" <mt:if name="require_change_note">checked="checked"</mt:if> /> <__trans phrase="Require change note"></label>
+</li></ul>
+</mtapp:setting>
+</div>
+
+<h2><__trans phrase="Export Settings"></h2>
+<mtapp:setting
+    id="developer_plugin_author_name"
+    label="<__trans phrase="Author Name">">
+    <ul><li><input type="text" id="developer_plugin_author_name" name="developer_plugin_author_name" style="width:100%" value="<mt:var name="developer_plugin_author_name" escape="html">" />
+    </li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_plugin_author_link"
+    label="<__trans phrase="Author Link">">
+    <ul><li><input type="text" id="developer_plugin_author_link" name="developer_plugin_author_link" style="width:100%" value="<mt:var name="developer_plugin_author_link" escape="html">" />
+    </li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_plugin_initial_version"
+    label="<__trans phrase="Version">">
+    <ul><li><input type="text" id="developer_plugin_initial_version" name="developer_plugin_initial_version" style="width:33%" value="<mt:var name="developer_plugin_initial_version" escape="html">" />
+    </li></ul>
+</mtapp:setting>
+
+<h2><__trans phrase="Alt Template Settings"></h2>
+<mtapp:setting
+    id="developer_default_alttemplate_status"
+    label="<__trans phrase="Default Status">">
+    <ul><li>
+        <select name="developer_default_alttemplate_status">
+            <option value="1" <mt:if name="developer_default_alttemplate_status" eq="1">selected="selected"</mt:if>><__trans phrase="Disabled"></option>
+            <option value="2" <mt:if name="developer_default_alttemplate_status" eq="2">selected="selected"</mt:if>><__trans phrase="Enabled"></option>
+        </select>
+    </li></ul>
+</mtapp:setting>
+
+<h2><__trans phrase="Data API Settings"></h2>
+<mtapp:setting
+    id="developer_data_api_endpoint"
+    label="<__trans phrase="Endpoint URL">">
+<ul><li>
+<input type="text" id="developer_data_api_endpoint" name="developer_data_api_endpoint" style="width:100%" value="<mt:var name="developer_data_api_endpoint" escape="html">" />
+</li></ul>
+</mtapp:setting>
+<mtapp:setting
+    id="developer_data_api_version"
+    label="<__trans phrase="Data API Version">">
+<ul><li>
+<input type="text" id="developer_data_api_version" name="developer_data_api_version" style="width:50%" value="<mt:var name="developer_data_api_version" escape="html">" />
+</li></ul>
+</mtapp:setting>
+
+<h2><__trans phrase="Export Hepler"></h2>
+<mtapp:setting
+    id="developer_export_studio_player"
+    label="<__trans phrase="Export">">
+<ul><li><a onclick="
+if ( window.confirm( '<__trans phrase="Are you sure you want to export helper plugin?">' ) ) {
+    return true;
+} else {
+    return false;
+}"
+href="<MTAdminScript>?__mode=export_studio_player&amp;magic_token=<mt:MagicToken escape="html">"><__trans phrase="Export StudioPlayer"></a>
+</li></ul>
+</mtapp:setting>
+

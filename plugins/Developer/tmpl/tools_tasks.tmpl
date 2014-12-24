@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+package MT::Tool::<mt:var name="plugin_id">;
+use strict;
+use warnings;
+use File::Spec;
+use FindBin;
+use lib map File::Spec->catdir( $FindBin::Bin, File::Spec->updir, $_ ), qw/lib extlib/;
+use base qw( MT::Tool );
+ 
+sub usage { '--debug 1' }
+ 
+sub help {
+    return q {
+        
+
+        --debug 1
+    };
+}
+ 
+our ( $debug );
+ 
+sub options {
+    return (
+        'debug=s'   => \$debug,
+    );
+}
+ 
+sub main {
+    my $class = shift;
+    my ( $verbose ) = $class->SUPER::main( @_ );
+<mt:var name="plugin_handler">
+    1;
+}
+
+__PACKAGE__->main() unless caller;

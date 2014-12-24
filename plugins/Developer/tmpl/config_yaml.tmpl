@@ -1,0 +1,15 @@
+name: <mt:var name="plugin_id">
+<mt:if name="plugin_type" eq="tag">tags:
+    <mt:var name="tagkind">:
+        <mt:var name="tag_name">: <mt:var name="plugin_id">::Tags::<mt:var name="handler_name">
+</mt:if><mt:if name="plugin_type" eq="callback">callbacks:
+<mt:loop name="handler_loop">    <mt:var name="handler_key">:
+        handler: <mt:var name="plugin_id">::Callbacks::<mt:var name="handler_name">
+        priority: <mt:var name="plugin_priority">
+</mt:loop>
+</mt:if><mt:if name="plugin_type" eq="method">applications:
+    <mt:var name="app_id">:
+        methods:
+            <mt:loop name="handler_loop"><mt:var name="handler_key">: <mt:var name="plugin_id">::<mt:var name="module_id">::<mt:var name="handler_name">
+</mt:loop>
+</mt:if>

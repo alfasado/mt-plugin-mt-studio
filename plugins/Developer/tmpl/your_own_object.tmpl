@@ -1,0 +1,61 @@
+package <mt:var name="plugin_id">::<mt:var name="module_id">;
+use strict;
+
+use base qw( MT::Object<mt:if name="taggable"> MT::Taggable</mt:if><mt:if name="revisable"> MT::Revisable</mt:if> );
+__PACKAGE__->install_properties( {
+    column_defs => <mt:var name="column_defs">,
+    indexes => <mt:var name="indexes">,
+    datasource => '<mt:var name="datasource">',
+    class_type => '<mt:var name="datasource">',
+    primary_key => 'id',<mt:if name="audit">
+    audit => 1,</mt:if><mt:if name="meta">
+    meta  => 1,</mt:if><mt:if name="blog_child">
+    child_of => [ 'MT::Blog', 'MT::Website' ],</mt:if>
+} );
+
+sub component_name {
+    my $obj = shift;
+    return '<mt:var name="plugin_id">'; ##
+}
+<mt:if name="class_label">
+sub class_label {
+    my $obj = shift;
+    MT->component( $obj->component_name )->translate( <mt:var name="class_label"> );
+}
+</mt:if><mt:if name="class_label_plural">
+sub class_label_plural {
+    my $obj = shift;
+    MT->component( $obj->component_name )->translate( <mt:var name="class_label_plural"> );
+}
+</mt:if><mt:if name="column_keys">
+sub show_columns {
+    my @show_cols = qw( <mt:var name="column_keys"> );
+    return @show_cols;
+}
+
+sub _nextprev {
+    my ( $obj, $direction ) = @_;
+    my $nextprev = MT->request( "<mt:var name="datasource">_$direction:" . $obj->id );
+    return $nextprev if defined $nextprev;
+    $nextprev = $obj->nextprev(
+        direction => $direction,
+        terms     => { blog_id => $obj->blog_id },
+        by        => 'created_on',
+    );
+    MT->request( "<mt:var name="datasource">_$direction:" . $obj->id, $nextprev );
+    return $nextprev;
+}
+</mt:if><mt:if name="blog_child">
+sub blog {
+    my $obj = shift;
+    if ( $obj->has_column( 'blog_id' ) ) {
+        if ( my $blog_id = $obj->blog_id ) {
+            require MT::Blog;
+            my $blog = MT::Blog->load( $blog_id );
+            return $blog if defined $blog;
+        }
+    }
+    return undef;
+}
+</mt:if>
+1;

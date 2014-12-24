@@ -1,0 +1,109 @@
+<__trans_section component="Developer">
+<mt:setvarblock name="page_title"><mt:var name="class_label"> - <__trans phrase="Change between rev.[_1] and rev.[_2]" params="<mt:var name="old_rev_num">%%<mt:var name="rev_num">"></mt:setvarblock>
+
+<mt:include name="dialog/header.tmpl">
+
+<mt:IfUseAce>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-github.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-terminal.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-xcode.js" type="text/javascript" charset="utf-8"></script>
+</mt:IfUseAce>
+
+<mt:setvarblock name="base_url"><mt:var name="script_url">?__mode=show_revision_diff&amp;current_revision=<mt:var name="request.current_revision" escape="html">&amp;_type=<mt:var name="request._type" escape="html">&amp;id=<mt:var name="request.id" escape="html">&amp;blog_id=<mt:var name="request.blog_id" escape="html">&amp;return_url=<mt:var name="request.return_url" escape="html"  escape="url"><mt:if name="request.dialog">&amp;dialog=1</mt:if>&amp;r=</mt:setvarblock>
+
+<mt:var name="request.r" setvar="view_version">
+<mt:var name="view_version" op="++" setvar="next_version">
+<mt:var name="view_version" op="--" setvar="previous_version">
+
+<ul class="object-nav" style="position:relative;text-align:center;<mt:unless name="show_more">margin-bottom:1em;</mt:unless>">
+<mt:if name="view_version" gt="1">
+    <li id="previous-link"><a href="<mt:var name="base_url"><mt:var name="previous_version">">&lsaquo; <__trans phrase="Previous"></a></li>
+</mt:if>
+<mt:if name="request.current_revision" gt="$view_version">
+    <li id="next-link"><a href="<mt:var name="base_url"><mt:var name="next_version">"><__trans phrase="Next"> &rsaquo;</a></li>
+</mt:if>
+</ul>
+
+<mt:if name="show_more"><h3 style="margin-bottom:0px"><mt:var name="text_label"></h3></mt:if>
+<mt:if name="revision_diff">
+<mt:IfUseAce>
+<div id="editor-div" style="height: 330px; width: 100%; font-size: <mt:var name="ace_font_size" escape="html">;"><mt:var name="revision_diff" escape="html"></div>
+<script type="text/javascript">
+    var editor = ace.edit( 'editor-div' );
+    editor.setTheme( 'ace/theme/<mt:var name="ace_theme" escape="html">' );
+    editor.getSession().setMode( 'ace/mode/diff' );
+    editor.setReadOnly( true );
+    editor.renderer.setShowGutter( false );
+</script>
+<mt:else>
+<pre><code><mt:var name="revision_diff" escape="html"></code></pre>
+</mt:IfUseAce>
+<mt:else>
+<p><pre><code><__trans phrase="No changes found."></code></pre>
+</mt:if>
+
+<mt:if name="show_more">
+<h3 style="margin-bottom:0px"><mt:var name="more_label"></h3>
+<mt:if name="revision_diff_more">
+<mt:IfUseAce>
+<div id="editor-div-more" style="height: 330px; width: 100%; font-size: <mt:var name="ace_font_size" escape="html">;"><mt:var name="revision_diff_more" escape="html"></div>
+<script type="text/javascript">
+    var editor_more = ace.edit( 'editor-div-more' );
+    editor_more.setTheme( 'ace/theme/<mt:var name="ace_theme" escape="html">' );
+    editor_more.getSession().setMode( 'ace/mode/diff' );
+    editor_more.setReadOnly( true );
+    editor_more.renderer.setShowGutter( false );
+</script>
+<mt:else>
+<pre><code><mt:var name="revision_diff_more" escape="html"></code></pre>
+</mt:IfUseAce>
+<mt:else>
+<pre><code><__trans phrase="No changes found."></code></pre>
+</mt:else>
+</mt:if>
+</mt:if>
+
+<h3 style="margin-bottom:0px"><__trans phrase="Change note"> ( <__trans phrase="Saved By"> : <mt:var name="created_by" escape="html"> )</h3>
+<pre><code><mt:var name="description" escape="html"></code></pre>
+
+<form style="margin-top:3em;">
+<input type="button" value="<__trans phrase="View List">"
+class="action primary button"
+onclick="window.location.href='<mt:var name="return_url" escape="html">';" />
+
+<mt:if name="request.dialog">
+<input type="button" value="<__trans phrase="Close">"
+class="send action cancel button"
+onclick="parent.jQuery.fn.mtDialog.close();" />
+<mt:else>
+<input type="button" value="<__trans phrase="Close">"
+class="send action cancel button"
+onclick="window.close();" />
+</mt:if>
+
+<mt:if name="view_version" gt="1">
+<input type="button" value="<__trans phrase="Restore from previous (rev.[_1])" params="<mt:var name="previous_version" escape="html">">"
+class="action button"
+onclick="<mt:unless name="request.dialog">window.opener.<mt:else>parent.</mt:unless>location.href='<mt:var name="script_url">?__mode=view&_type=<mt:var name="request._type" escape="html">&id=<mt:var name="request.id" escape="html">&blog_id=<mt:var name="request.blog_id" escape="html">&r=<mt:var name="previous_version" escape="html">';
+<MTIgnore>
+<mt:if name="request.dialog">parent.jQuery.fn.mtDialog.close();<mt:else>window.close();</mt:if>
+</MTIgnore>
+" />
+</mt:if>
+
+<mt:if name="request.current_revision" gt="$view_version">
+<input type="button" value="<__trans phrase="Restore from this (rev.[_1])" params="<mt:var name="rev_num">">"
+class="action button"
+onclick="<mt:unless name="request.dialog">window.opener.<mt:else>parent.</mt:unless>location.href='<mt:var name="script_url">?__mode=view&_type=<mt:var name="request._type" escape="html">&id=<mt:var name="request.id" escape="html">&blog_id=<mt:var name="request.blog_id" escape="html">&r=<mt:var name="rev_num" escape="html">';
+<MTIgnore>
+<mt:if name="request.dialog">parent.jQuery.fn.mtDialog.close();<mt:else>window.close();</mt:if>
+</MTIgnore>
+" />
+</mt:if>
+
+</form>
+
+<mt:include name="dialog/footer.tmpl">
+</__trans_section>

@@ -1,0 +1,58 @@
+<mt:if name="tagkind" eq="function">
+    $base = dirname( dirname( __FILE__ ) );
+    $base = "${base}/tmpl";
+    $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
+    $_var_compiled = '';
+    $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+    ob_start();
+    $ctx->_eval( '?>' . $_var_compiled );
+    $_contents = ob_get_contents();
+    ob_end_clean();
+    return $_contents;<mt:elseif name="tagkind" eq="modifier">
+    $mt = MT::get_instance();
+    $ctx =& $mt->context();
+    $ctx->__stash[ 'vars' ][ 'modifier_text' ] = $text;
+    $ctx->__stash[ 'vars' ][ 'modifier_arg' ] = $arg;
+    $base = dirname( dirname( __FILE__ ) );
+    $base = "${base}/tmpl";
+    $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
+    $_var_compiled = '';
+    $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+    ob_start();
+    $ctx->_eval( '?>' . $_var_compiled );
+    $_contents = ob_get_contents();
+    ob_end_clean();
+    return $_contents;<mt:else>
+    $tag = $ctx->this_tag();
+    $base = dirname( dirname( __FILE__ ) );
+    $base = "${base}/tmpl";
+    $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
+    if ( strpos( $tag, 'mtif' ) !== FALSE ) {
+        $_var_compiled = '';
+        $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+        ob_start();
+        $ctx->_eval( '?>' . $_var_compiled );
+        $_contents = ob_get_contents();
+        ob_end_clean();
+        if ( strpos( $tag, 'mtif' ) !== FALSE ) {
+            if ( $_contents ) {
+                return $ctx->_hdlr_if( $args, $content, $ctx, $repeat, TRUE );
+            } else {
+                return $ctx->_hdlr_if( $args, $content, $ctx, $repeat, FALSE );
+            }
+        }
+    } else {
+        if (! isset ( $content ) ) {
+            $repeat = TRUE;
+        } else {
+            $repeat = FALSE;
+            $ctx->__stash[ 'vars' ][ '__content__' ] = $content;
+            $_var_compiled = '';
+            $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+            ob_start();
+            $ctx->_eval( '?>' . $_var_compiled );
+            $_contents = ob_get_contents();
+            ob_end_clean();
+            return $contents;
+        }
+    }</mt:if>

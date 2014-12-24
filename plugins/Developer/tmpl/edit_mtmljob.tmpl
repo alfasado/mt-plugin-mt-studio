@@ -1,0 +1,1308 @@
+<__trans_section component="Developer">
+<mt:setvar name="edit_screen" value="1">
+<mt:setvar name="use_revision" value="1">
+<mt:if name="config.AllowPerlScript">
+    <mt:if name="config.AllowPHPScript">
+        <mt:var name="can_command" value="1">
+    </mt:if>
+</mt:if>
+<mt:setvarblock name="html_title"><mt:if name="id"><mt:var name="title" escape="html"> - <__trans phrase="Edit Custom Handler"><mt:else><__trans phrase="Create Custom Handler"></mt:else></mt:if></mt:setvarblock>
+<mt:setvarblock name="page_title"><mt:if name="id"><__trans phrase="Edit Custom Handler"><mt:else><__trans phrase="Create Custom Handler"></mt:if></mt:setvarblock>
+<mt:setvarblock name="system_msg">
+    <mt:if name="saved">
+        <mtapp:statusmsg
+           id="saved"
+            class="success"
+            rebuild="all">
+            <__trans phrase="Your changes have been saved.">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="error">
+        <mtapp:statusmsg
+            id="generic-error"
+            class="error">
+            <mt:var name="error">
+        </mtapp:statusmsg>
+    </mt:if>
+<mt:if name="loaded_revision">
+  <mtapp:statusmsg
+     id="loaded_revision"
+     class="info">
+    <__trans phrase="Restored revision (Date:[_1])." params="<$mt:var name="rev_date" escape="html"$>">
+  </mtapp:statusmsg>
+</mt:if>
+</mt:setvarblock>
+<mt:setvarblock name="html_head" append="1">
+<script type="text/javascript">
+function toggle_template( id, prop ){
+    if ( document.getElementById( id ) ) {
+        if ( id == 'test_mtml-wrapper' ) {
+            if ( document.getElementById( 'interval8' ).checked ) {
+                if ( document.getElementById( 'display-editor-mtml' ).checked ) {
+                    if ( prop == 'block' ) {
+                        document.getElementById( id ).style.display = prop;
+                    }
+                } else {
+                    if ( prop == 'none' ) {
+                        document.getElementById( id ).style.display = prop;
+                    }
+                }
+                return;
+            }
+        }
+        document.getElementById( id ).style.display = prop;
+    }
+}
+function toggle_perl ( bool ) {
+    if ( document.getElementById( 'evalscript' ) ) {
+        if ( bool == true ) {
+            // document.getElementById( 'evalscript' ).checked = true;
+            document.getElementById( 'evalscript' ).disabled = 'disabled';
+        } else {
+            document.getElementById( 'evalscript' ).disabled = '';
+        }
+    }
+}
+function toggle_placeholder( cb ){
+    if ( document.getElementById( 'evalscript' ) ) {
+        if ( cb.checked ) {
+            document.getElementById( 'text' ).placeholder = '<__trans phrase="Perl Code">';
+            document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="Perl Code">';
+        } else {
+            document.getElementById( 'text' ).placeholder = '<__trans phrase="MTML Code">';
+            document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="MTML Code">';
+        }
+    }
+}
+function toggle_php(){
+    if ( document.getElementById( 'interval9' ).checked ) {
+        document.getElementById( 'default_mode_label' ).style.display = 'inline';
+    } else {
+        document.getElementById( 'default_mode_label' ).style.display = 'none';
+    }
+    if ( document.getElementById( 'evalscript' ) ) {
+        if ( ( document.getElementById( 'evalphp' ).checked ) && ( document.getElementById( 'interval8' ).checked ) ) {
+            document.getElementById( 'text_php-wrapper' ).style.display = 'block';
+            document.getElementById( 'display-editor-wrapper' ).style.display = 'block';
+            // document.getElementById( 'display-editor-perl' ).checked = true;
+            // document.getElementById( 'display-editor-php' ).checked = true;
+            document.getElementById( 'php_preview-wrapper' ).style.display = 'inline';
+            document.getElementById( 'export_plugin-wrapper' ).style.display = 'block';
+        } else {
+            document.getElementById( 'text_php-wrapper' ).style.display = 'none';
+            document.getElementById( 'text-field' ).style.display = 'block';
+            document.getElementById( 'display-editor-perl' ).checked = true;
+            document.getElementById( 'display-editor-wrapper' ).style.display = 'none';
+            document.getElementById( 'php_preview-wrapper' ).style.display = 'none';
+            if ( ( document.getElementById( 'interval0' ).checked == false )
+            && ( document.getElementById( 'evalscript' ).checked ) ) {
+                document.getElementById( 'export_plugin-wrapper' ).style.display = 'block';
+            } else {
+                if ( document.getElementById( 'interval0' ).checked ) {
+                    document.getElementById( 'export_plugin-wrapper' ).style.display = 'none';
+                } else {
+                    document.getElementById( 'export_plugin-wrapper' ).style.display = 'block';
+                }
+                // if ( ( document.getElementById( 'interval7' ).checked ) ||
+                //     ( document.getElementById( 'interval8' ).checked ) || 
+                //     ( document.getElementById( 'interval9' ).checked ) ||
+                //     ( document.getElementById( 'interval10' ).checked ) ||
+                //     ( document.getElementById( 'interval11' ).checked ) || 
+                //     ( document.getElementById( 'interval12' ).checked ) ) {
+                //     document.getElementById( 'export_plugin-wrapper' ).style.display = 'block';
+                // } else {
+                //     document.getElementById( 'export_plugin-wrapper' ).style.display = 'none';
+                // }
+            }
+            // && ( document.getElementById( 'interval9' ).checked ) == false
+        }
+    }
+}
+function select_php( cb ){
+    if ( document.getElementById( 'interval8' ).checked ) {
+        if (! cb ) {
+            if ( document.getElementById( 'evalscript' ) ) {
+                cb = document.getElementById( 'evalscript' );
+            }
+            if (! cb ) {
+                return;
+            }
+        }
+        document.getElementById( 'evalscript' ).checked = cb.checked;
+        if ( document.getElementById( 'evalphp' ) ) {
+            document.getElementById( 'evalphp' ).checked = cb.checked;
+        }
+        toggle_php();
+    }
+}
+</script>
+</mt:setvarblock>
+<mt:if name="evalphp">
+    <mt:if name="interval" eq="8">
+        <mt:var name="show_evalphp" value="1">
+    </mt:if>
+</mt:if>
+<mt:if name="evalscript">
+    <mt:if name="interval">
+        <mt:var name="show_exporter" value="1">
+    </mt:if>
+<MTIgnore>
+    <mt:if name="interval" eq="1">
+        <mt:var name="show_exporter" value="1">
+    </mt:if>
+</MTIgnore>
+</mt:if>
+<mt:setvarblock name="related_content">
+<mt:if name="use_revision">
+<mtapp:widget
+   id="template-status-widget"
+   class="status-widget"
+   label="<__trans phrase="Status">">
+  <mt:if name="new_object">
+    <p class="zero-state"><__trans phrase="New Custom Handler"></p>
+  <mt:else>
+    <div class="revision-info">
+    <mt:if name="rev_date">
+      <p><__trans phrase="Revision: <strong>[_1]</strong>" params="<mt:var name="rev_date" escape="html">"></p>
+      <div><a href="<mt:var name="script_url">?__mode=list_revision&_type=<mt:var name="object_type">&id=<$mt:var name="id" escape="html"$>&blog_id=<$mt:var name="blog_id"$>&r=<mt:var name="rev_number" escape="html">" class="mt-open-dialog" title="<__trans phrase="View revisions of this Custom Handler">"><__trans phrase="View revisions"></a></div>
+<mt:setvarblock name="next_return_url"><mt:var name="script_url">?__mode=list_revision&_type=<mt:var name="object_type">&id=<$mt:var name="id" escape="html"$>&blog_id=<$mt:var name="blog_id"$>&r=<mt:var name="rev_number" escape="html"></mt:setvarblock>
+      <div><a href="javascript:void(0);" onclick="window.open('<mt:var name="script_url">?__mode=show_revision_diff&current_revision=<mt:var name="current_revision" escape="html">&_type=<mt:var name="object_type">&id=<$mt:var name="id" escape="html"$>&blog_id=<$mt:var name="blog_id"$>&return_url=<mt:var name="next_return_url" escape="url">&r=<mt:var name="current_revision" escape="html">', 'revision-<mt:var name="object_type" escape="html">-<mt:var name="id" escape="html">', 'width=640, height=640, menubar=no, toolbar=no, scrollbars=yes');" title="<__trans phrase="View Latest Changes in new Window">">
+<__trans phrase="View Latest Changes"></a></div>
+    <mt:else>
+      <p class="zero-state"><__trans phrase="No revision(s) associated with this Custom Handler"></p>
+    </mt:if>
+    </div>
+  </mt:if>
+</mtapp:widget>
+</mt:if>
+<mt:IfUseAce>
+<mtapp:widget
+   id="ace-status-widget"
+   class="ace-widget"
+   label="<__trans phrase="Editor Settings">">
+   <form action="<mt:var name="script_url">">
+        <table style="width:100%;margin-bottom:20px"><tr>
+        <td style="padding:4px"><__trans phrase="Theme"> : </td><td style="padding:4px">
+        <select name="ace_theme" onchange="change_ace_mode( this )" style="width:100%">
+            <option value="cobalt" <mt:if name="ace_theme" eq="cabalt">selected="selected"</mt:if>>Cobalt</option>
+            <option value="terminal" <mt:if name="ace_theme" eq="terminal">selected="selected"</mt:if>>Terminal</option>
+            <option value="github" <mt:if name="ace_theme" eq="github">selected="selected"</mt:if>>GitHub</option>
+            <option value="xcode" <mt:if name="ace_theme" eq="xcode">selected="selected"</mt:if>>Xcode</option>
+        </select>
+        </td>
+        </tr>
+        <tr>
+        <td style="padding:4px"><__trans phrase="Font Size"> : </td><td style="padding:4px">
+        <select name="ace_font_size" onchange="change_ace_font_size( this )" style="width:100%">
+            <option value="12px" <mt:if name="ace_font_size" eq="12px">selected="selected"</mt:if>>12px</option>
+            <option value="14px" <mt:if name="ace_font_size" eq="14px">selected="selected"</mt:if>>14px</option>
+            <option value="16px" <mt:if name="ace_font_size" eq="16px">selected="selected"</mt:if>>16px</option>
+            <option value="18px" <mt:if name="ace_font_size" eq="18px">selected="selected"</mt:if>>18px</option>
+        </select>
+        </td>
+        </tr>
+        <tr>
+        <td style="padding:4px"><__trans phrase="Editor Height"> : </td><td style="padding:4px">
+        <select name="ace_editor_height" onchange="change_ace_editor_height( this )" style="width:100%">
+            <option value="300px" <mt:if name="ace_editor_height" eq="300px">selected="selected"</mt:if>>300px</option>
+            <option value="500px" <mt:if name="ace_editor_height" eq="500px">selected="selected"</mt:if>>500px</option>
+            <option value="700px" <mt:if name="ace_editor_height" eq="700px">selected="selected"</mt:if>>700px</option>
+            <option value="900px" <mt:if name="ace_editor_height" eq="900px">selected="selected"</mt:if>>900px</option>
+        </select>
+        </td>
+        </tr>
+        <tr>
+        <td style="padding:4px"><__trans phrase="MTML Mode"> : </td><td style="padding:4px">
+        <select name="ace_mtml_mode" onchange="change_ace_editor_mtmlmode( this )" style="width:100%">
+            <option value="xml" <mt:if name="ace_mtml_mode" eq="xml">selected="selected"</mt:if>>XML</option>
+            <option value="plain_text" <mt:if name="ace_mtml_mode" eq="plain_text">selected="selected"</mt:if>>Plain Text</option>
+        </select>
+        </td>
+        </tr>
+        </table>
+
+    <div style="text-align:center">
+    <button
+        type="submit"
+        title="<__trans phrase="Save this Settings As Default">"
+        class="button"
+        onclick="set_default();return false;"
+        ><__trans phrase="Save As Default"></button>
+    </div>
+    </form>
+    <mt:if name="can_command">
+        <table id="display-editor-wrapper"
+        <mt:if name="show_evalphp">
+            style="width:100%;display:block;margin-top:30px;margin-bottom:0px;"
+        <mt:else>
+            style="width:100%;display:none;margin-top:30px;margin-bottom:0px;"
+        </mt:if>
+        >
+        <tr>
+        <td style="padding:4px;white-space:nowrap"><__trans phrase="Display"> : </td><td style="padding:4px;line-height:1.7em">
+        <label><input id="display-editor-perl" type="checkbox" checked="checked" onchange="
+        if ( this.checked ) {
+            toggle_template( 'text-field', 'block' );
+            if ( no_input == true ) {
+                <mt:IfUseAce>
+                document.getElementById( 'text' ).value = initial_function;
+                editor.setValue( initial_function );
+                <mt:else>
+                document.getElementById( 'text' ).value = initial_function;
+                </mt:IfUseAce>
+                no_input = true;
+            }
+        } else {
+            toggle_template( 'text-field', 'none' );
+        }
+        "/> Perl</label> &nbsp; &nbsp; &nbsp;
+        <label><input id="display-editor-php"  type="checkbox" checked="checked" onchange="
+        if ( this.checked ) {
+            toggle_template( 'text_php-field', 'block' );
+            if ( no_input == true ) {
+                <mt:IfUseAce>
+                document.getElementById( 'text_php' ).value = php_initial_function;
+                php_editor.setValue( php_initial_function );
+                <mt:else>
+                document.getElementById( 'text_php' ).value = php_initial_function;
+                </mt:IfUseAce>
+                no_input = true;
+            }
+        } else {
+            toggle_template( 'text_php-field', 'none' );
+        }
+        "/> PHP</label>
+
+        <br />
+        <label><input id="display-editor-mtml"  type="checkbox" checked="checked" onchange="
+        if ( this.checked ) {
+            toggle_template( 'test_mtml-wrapper', 'block' );
+        } else {
+            toggle_template( 'test_mtml-wrapper', 'none' );
+        }
+        "/> MTML</label>
+        </td>
+        </tr>
+        </table>
+    </mt:if>
+
+    <script type="text/javascript">
+    var mytheme = '<mt:var name="ace_theme" escape="html">';
+    var mysize = '<mt:var name="ace_font_size" escape="html">';
+    var myheight = '<mt:var name="ace_editor_height" escape="html">';
+    var mymtmlmode = '<mt:var name="ace_mtml_mode" escape="html">';
+    function set_default() {
+        jQuery.ajax( {
+          type: 'POST',
+          contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+          url: '<mt:var name="script_url">',
+          dataType: 'json',
+          data: {
+            __mode: 'set_ace_settings_as_default',
+            magic_token: jQuery( 'input[name="magic_token"]' ).val(),
+            params: mytheme + ',' + mysize + ',' + myheight + ',' + mymtmlmode,
+          },
+          complete: function() {
+              alert( '<__trans phrase="Your settings has been saved as default settings.">' );
+          },
+          error: function(xhr, status, error) {
+              alert( trans( 'Communication Error (HTTP status code: [_1]. Message: [_2])', xhr.status, error) );
+          }
+        } );
+    }
+    function change_ace_mode( sel ) {
+        editor.setTheme( 'ace/theme/' + sel.value );
+        php_editor.setTheme( 'ace/theme/' + sel.value );
+        test_editor.setTheme( 'ace/theme/' + sel.value );
+        mytheme = sel.value;
+    }
+    function change_ace_font_size( sel ) {
+        document.getElementById( 'editor-div' ).style.fontSize = sel.value;
+        document.getElementById( 'php-editor-div' ).style.fontSize = sel.value;
+        document.getElementById( 'test-editor-div' ).style.fontSize = sel.value;
+        mysize = sel.value;
+    }
+    function change_ace_editor_height( sel ) {
+        document.getElementById( 'editor-div' ).style.height = sel.value;
+        document.getElementById( 'php-editor-div' ).style.height = sel.value;
+        myheight = sel.value;
+    }
+    function change_ace_editor_mtmlmode( sel ) {
+        var mode_path = 'ace/mode/' + sel.value;
+        if ( editor.getSession().getMode().$id != mode_path ) {
+            editor.getSession().setMode( mode_path );
+        }
+        if ( php_editor.getSession().getMode().$id != mode_path ) {
+            php_editor.getSession().setMode( mode_path );
+        }
+        if ( test_editor.getSession().getMode().$id != mode_path ) {
+            test_editor.getSession().setMode( mode_path );
+        }
+        mymtmlmode = sel.value;
+    }
+    </script>
+</mtapp:widget>
+</mt:IfUseAce>
+<MTIgnore>
+<mt:if name="interval" eq="11">
+    <mt:var name="show_exporter" value="1">
+<mt:elseif name="interval" eq="10">
+    <mt:var name="show_exporter" value="1">
+<mt:elseif name="interval" eq="9">
+    <mt:var name="show_exporter" value="1">
+<mt:elseif name="interval" eq="8">
+    <mt:var name="show_exporter" value="1">
+<mt:elseif name="interval" eq="7">
+    <mt:var name="show_exporter" value="1">
+</mt:if>
+</MTIgnore>
+<mt:if name="interval">
+    <mt:var name="show_exporter" value="1">
+</mt:if>
+<div id="export_plugin-wrapper"
+    <mt:if name="show_exporter">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+<mtapp:widget
+   id="export-plugin-widget"
+   class="ace-widget"
+   label="<__trans phrase="Export Plugin">">
+    <form  method="post" action="<mt:var name="script_url">" target="_blank_<$mt:var name="id" escape="html"$>">
+        <input type="hidden" name="_type" value="" />
+        <input type="hidden" name="__mode" value="mtmljob_export_plugin" id="export_plugin-mode" />
+        <input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+        <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+        <input type="hidden" name="export_text" value="" id="export_text" />
+        <input type="hidden" name="export_text_php" value="" id="export_text_php" />
+        <input type="hidden" name="export_evalscript" value="" id="export_evalscript" />
+        <input type="hidden" name="export_detail" value="" id="export_detail" />
+        <input type="hidden" name="export_tagkind" value="" id="export_tagkind" />
+        <input type="hidden" name="export_interval" value="" id="export_interval" />
+        <input type="hidden" name="export_priority" value="" id="export_priority" />
+        <input type="hidden" name="export_app_ref" value="" id="export_app_ref" />
+        <input type="hidden" name="export_is_default" value="<mt:var name="is_default" escape="html">" />
+        <input type="hidden" name="export_basename" value="" id="export_basename" />
+        <input type="hidden" name="export_title" value="" id="export_title" />
+        <input type="hidden" name="export_requires_login" value="" id="export_requires_login" />
+        <input type="hidden" name="export_nextrun_on" value="" id="export_nextrun_on" />
+        <p><input type="text" id="export_plugin_id" name="export_plugin_id" value="" placeholder="<__trans phrase="Plugin Name">" /></p>
+        <div style="text-align:center">
+        <button
+            type="submit"
+            title="<__trans phrase="Export this Handler as Plugin">"
+            class="button"
+            onclick="return set_export_element();"
+            ><__trans phrase="Export"></button>
+        </div>
+    </form>
+    <script type="text/javascript">
+    function set_export_element() {
+        var intervals = document.getElementsByName( 'interval' );
+        var my_interval;
+        for( var i = 0; i < intervals.length; i++ ) {
+            if ( intervals[ i ].checked ) {
+                 document.getElementById( 'export_interval' ).value = i;
+                 my_interval = i;
+            }
+        }
+        my_priority = document.getElementById( 'priority' ).selectedIndex;
+        my_priority++;
+        document.getElementById( 'export_priority' ).value = my_priority;
+        document.getElementById( 'export_text' ).value = document.getElementById( 'text' ).value;
+        document.getElementById( 'export_text_php' ).value = document.getElementById( 'text_php' ).value;
+        document.getElementById( 'export_app_ref' ).value = document.getElementById( 'app_ref' ).value;
+        var my_basename = document.getElementById( 'basename' ).value;
+        document.getElementById( 'export_basename' ).value = my_basename;
+        var export_detail = document.getElementById( 'detail' ).value;
+        document.getElementById( 'export_detail' ).value = export_detail;
+        var tagkinds = document.getElementsByName( 'tagkind' );
+        var export_tagkind;
+        var export_nextrun_on = document.getElementById( 'nextrun_on_date' ).value;
+        export_nextrun_on = export_nextrun_on + document.getElementById( 'nextrun_on_time' ).value;
+        var export_title = document.getElementById( 'title' ).value;
+        document.getElementById( 'export_title' ).value = export_title;
+        document.getElementById( 'export_nextrun_on' ).value = export_nextrun_on;
+        if ( document.getElementById( 'evalscript' ).checked ) {
+            document.getElementById( 'export_evalscript' ).value = 1;
+        } else {
+            document.getElementById( 'export_evalscript' ).value = 0;
+        }
+        if ( document.getElementById( 'requires_login' ).checked ) {
+            document.getElementById( 'export_requires_login' ).value = 1;
+        } else {
+            document.getElementById( 'export_requires_login' ).value = 0;
+        }
+        var export_id = document.getElementById( 'export_plugin_id' ).value;
+        for( var i = 0; i < tagkinds.length; i++ ) {
+            if ( tagkinds[ i ].checked ) {
+                export_tagkind = tagkinds[ i ].value;
+                document.getElementById( 'export_tagkind' ).value = export_tagkind;
+            }
+        }
+        if ( export_id == '' ) {
+            alert( '<__trans phrase="Plugin Name is required.">' );
+            return false;
+        }
+        if ( my_basename == '' ) {
+            alert( '<__trans phrase="A Custom Handler's basename is required.">' );
+            return false;
+        }
+        if ( ( 4 < my_interval  ) && ( 8 > my_interval  ) ) {
+            if ( ( export_nextrun_on == '' ) || ( my_basename == '' ) || ( export_title == '' ) ) {
+                alert( '<__trans phrase="Title and Basename are required.">' );
+                return false;
+            }
+        }
+        if ( ( ( 4 < my_interval  ) && ( 9 > my_interval  ) ) || ( my_interval == 10 ) ) {
+            if ( export_detail == '' ) {
+                if ( my_interval == 8 ) {
+                    alert( '<__trans phrase="Enter Tag name.">' );
+                } else {
+                    alert( '<__trans phrase="Detail is required.">' );
+                }
+                return false;
+            }
+        }
+        if ( ( my_interval == 8 ) && ( export_tagkind == '' ) ) {
+            alert( '<__trans phrase="Some fields are required.">' );
+            return false;
+        }
+        if ( window.confirm( '<__trans phrase="Are you sure you want to export plugin?">' ) ) {
+            document.getElementById( 'export_plugin-mode' ).value = 'mtmljob_export_plugin';
+            // alert( document.getElementById( 'export_plugin-mode' ).value );
+            return true;
+        } else {
+            return false;
+        }
+        return false;
+    }
+    </script>
+</mtapp:widget>
+</div>
+<mtapp:widget
+   id="useful-link-widget"
+   class="link-widget"
+   label="<__trans phrase="Links">">
+    <ul>
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DeveloperGuideURL">" target="_blank"><__trans phrase="__DeveloperGuide"></a></li>
+<mt:if name="debugger_url">
+    <li><a a class="icon-left icon-related" href="<__trans phrase="__DebuggerURL">" target="_blank"><__trans phrase="MTDataAPIDebugger"></a></li>
+</mt:if>
+    <li><a a class="icon-left icon-related" href="<mt:var name="script_url">?__mode=cfg_plugins&blog_id=0" target="_blank"><__trans phrase="System"><mt:if name="language_id" ne="ja"> </mt:if><__trans phrase="Plugin Settings"></a></li>
+    <li><a a class="icon-left icon-related" href="<mt:var name="script_url">?__mode=list&_type=log&blog_id=0" target="_blank"><__trans phrase="System"><mt:if name="language_id" ne="ja"> </mt:if><__trans phrase="Log"></a></li>
+    <mt:loop name="app_links">
+        <li><a class="icon-left icon-related" href="<mt:var name="link_url" escape="html">" target="_blank"><mt:var name="link_label" escape="html"></a></li>
+    </mt:loop>
+    </ul>
+</mtapp:widget>
+</mt:setvarblock>
+<mt:include name="include/header.tmpl">
+<form method="post" action="<mt:var name="script_url">" id="mtmljob_form">
+    <input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+    <input type="hidden" name="__mode" value="save" id="this_mode" />
+    <input type="hidden" name="_type" value="mtmljob" />
+    <input type="hidden" name="return_args" id="this_return_args" value="<mt:var name="return_args" escape="html">" />
+    <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+<mt:if name="use_revision">
+  <input type="hidden" name="save_revision" id="save_revision" value="1" />
+  <input type="hidden" name="current_revision" id="current_revision" value="<mt:ifNonEmpty name="current_revision"><mt:var name="current_revision"><mt:else>0</mt:IfNonEmpty>" />
+</mt:if>
+<fieldset>
+    <mtapp:setting
+        id="title"
+        label_class="top-label"
+        label="<__trans phrase="Title">"
+        show_hint="0"
+        show_label="0">
+    <input type="text" style="width:100%" name="title" id="title" placeholder="<__trans phrase="Name">" class="title text full-width" value="<mt:var name="title" escape="html">" />
+    </mtapp:setting>
+<mt:IfUseAce>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-github.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-terminal.js" type="text/javascript" charset="utf-8"></script>
+<script src="<$mt:var name="static_uri"$>plugins/Developer/ace/src/theme-xcode.js" type="text/javascript" charset="utf-8"></script>
+</mt:IfUseAce>
+
+<mt:if name="evalscript">
+<mt:setvarblock name="codeLabel"><__trans phrase="Perl Code"></mt:setvarblock>
+<mt:else>
+<mt:setvarblock name="codeLabel"><__trans phrase="MTML Code"></mt:setvarblock>
+</mt:if>
+
+    <mtapp:setting
+        id="text"
+        label_class="text-top"
+        label="<mt:var name="codeLabel">"
+        show_hint="0"
+        show_label="1">
+<mt:IfUseAce>
+<div id="editor-div" style="height: <mt:var name="ace_editor_height" escape="html">; width: 100%;"><mt:var name="text" escape="html"></div>
+</mt:IfUseAce>
+
+        <textarea name="text" id="text" style="width:100%;height:320px" placeholder="<__trans phrase="MTML Code">" class="text full-width" ><mt:var name="text" escape="html"></textarea>
+    </mtapp:setting>
+
+<mt:IfUseAce>
+<script type="text/javascript">
+    document.getElementById( 'text' ).style.display = 'none';
+    // document.getElementById( 'editor-div' ).innerHTML = document.getElementById( 'text' ).value;
+    var editor = ace.edit( 'editor-div' );
+    editor.setTheme( 'ace/theme/<mt:var name="ace_theme" escape="html">' );
+    // or MTML
+<mt:if name="interval" eq="12">
+    editor.getSession().setMode( 'ace/mode/yaml' );
+    editor.setShowInvisibles( true );
+    document.getElementById( 'text' ).placeholder = '<__trans phrase="YAML Document">';
+    document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="YAML Document">';
+<mt:else>
+    <mt:if name="evalscript">
+    editor.getSession().setMode( 'ace/mode/perl' );
+    editor.setShowInvisibles( true );
+    <mt:else>
+    editor.getSession().setMode( 'ace/mode/<mt:var name="ace_mtml_mode" escape="html">' );
+    editor.setShowInvisibles( true );
+    </mt:if>
+</mt:if>
+    document.getElementById( 'editor-div' ).style.fontSize = '<mt:var name="ace_font_size" escape="html">';
+    editor.getSession().on( 'change', function(){
+        var textcode = editor.getSession().getValue();
+        document.getElementById( 'text' ).value = textcode;
+        no_input = false;
+    });
+    function change_editor_mode( cb ) {
+        if ( document.getElementById( 'interval12' ).checked ) {
+            editor.getSession().setMode( 'ace/mode/yaml' );
+            editor.setShowInvisibles( true );
+            document.getElementById( 'text' ).placeholder = '<__trans phrase="YAML Document">';
+            document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="YAML Document">';
+        } else {
+            if ( cb == 'evalscript' ) {
+                cb = document.getElementById( 'evalscript' );
+            }
+            if ( cb.checked ) {
+                // document.getElementById( 'text-label' ).innerHTML = 'Perl Code';
+                editor.getSession().setMode( 'ace/mode/perl' );
+                editor.setShowInvisibles( true );
+                document.getElementById( 'text' ).placeholder = '<__trans phrase="Perl Code">';
+                document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="Perl Code">';
+            } else {
+                // document.getElementById( 'text-label' ).innerHTML = 'MTML Code';
+                editor.getSession().setMode( 'ace/mode/<mt:var name="ace_mtml_mode" escape="html">' );
+                editor.setShowInvisibles( true );
+                document.getElementById( 'text' ).placeholder = '<__trans phrase="MTML Code">';
+                document.getElementById( 'text-label' ).innerHTML = '<__trans phrase="MTML Code">';
+            }
+        }
+    }
+    var no_input;
+    var php_initial_function = '';
+    var initial_function = '';
+    function initialize_tag () {
+        if ( no_input == true ) {
+            if ( document.getElementById( 'interval12' ).checked ) {
+                initial_function = "id: PluginId\n\n";
+                <mt:IfUseAce>
+                document.getElementById( 'text' ).value = initial_function;
+                editor.setValue( initial_function );
+                <mt:else>
+                document.getElementById( 'text' ).value = initial_function;
+                </mt:IfUseAce>
+                no_input = true;
+                return;
+            }
+            if ( document.getElementById( 'evalscript' ).checked ) {
+                // var initial_function = '';
+                // var php_initial_function = '';
+                if ( document.getElementById( 'interval7' ).checked ) {
+                    initial_function = "sub _cb_callback {\n    my ( $cb ) = @_;\n\n}";
+                } else if ( document.getElementById( 'interval9' ).checked ) {
+                    initial_function = "sub _app_hdlr {\n    my $app = shift;\n\n}";
+                } else if ( document.getElementById( 'interval10' ).checked ) {
+                    initial_function = "sub _app_method {\n    my $app = shift;\n\n}";
+        <mt:if name="mt_version_id" like="/^5/">
+        <mt:elseif name="mt_version_id" like="/^4/">
+        <mt:else>
+                } else if ( document.getElementById( 'interval11' ).checked ) {
+                    initial_function = "sub _data_api_endpoint {\n    my ( $app, $endpoint ) = @_;\n\n}";
+        </mt:if>
+                } else if ( document.getElementById( 'interval8' ).checked ) {
+                    var tagkinds = document.getElementsByName( 'tagkind' );
+                    var my_tagkind;
+                    for( var i=0; i < tagkinds.length; i++ ) {
+                        if ( tagkinds[ i ].checked ) {
+                            my_tagkind = tagkinds[ i ].value;
+                        }
+                    }
+                    if ( my_tagkind == 'function' ) {
+                        initial_function = "sub _hdlr_function {\n    my ( $ctx, $args, $cond ) = @_;\n\n}";
+                        php_initial_function = "<?php\nfunction smarty_function_mtfunction ( $args, &$ctx ) {\n\n\n}";
+                    } else if ( my_tagkind == 'block' ) {
+                        initial_function = "sub _hdlr_block {\n    my ( $ctx, $args, $cond ) = @_;\n\n}";
+                        php_initial_function = "<?php\nfunction smarty_block_mtblock ( $args, $content, &$ctx, &$repeat ) {\n\n";
+                        php_initial_function = php_initial_function + "\n}";
+                    } else if ( my_tagkind == 'conditional' ) {
+                        initial_function = "sub _hdlr_ifcondition {\n    my ( $ctx, $args, $cond ) = @_;\n\n}";
+                        php_initial_function = "<?php\nfunction smarty_block_mtifcondition ( $args, $content, &$ctx, &$repeat ) {\n\n";
+                        php_initial_function = php_initial_function + "    return $ctx->_hdlr_if( $args, $content, $ctx, $repeat, FALSE );";
+                        php_initial_function = php_initial_function + "\n}";
+                    } else if ( my_tagkind == 'modifier' ) {
+                        initial_function = "sub _filter_modifier {\n    my ( $text, $arg ) = @_;\n\n}";
+                        php_initial_function = "<?php\nfunction smarty_modifier_mtmodifier ( $text, $arg ) {\n\n";
+                        php_initial_function = php_initial_function + "\n}";
+                    }
+                } else if ( document.getElementById( 'interval0' ).checked == false ) {
+                    initial_function = "sub _run_task {\n    my $app = MT->instance();\n\n}";
+                }
+                <mt:IfUseAce>
+                // document.getElementById( 'text_php-wrapper' ).style.display == 'block';
+                document.getElementById( 'text_php' ).value = php_initial_function;
+                document.getElementById( 'text' ).value = initial_function;
+                php_editor.setValue( php_initial_function );
+                editor.setValue( initial_function );
+                <mt:else>
+                document.getElementById( 'text_php' ).value = php_initial_function;
+                document.getElementById( 'text' ).value = initial_function;
+                </mt:IfUseAce>
+                no_input = true;
+            } else {
+                <mt:IfUseAce>
+                php_editor.setValue( '' );
+                editor.setValue( '' );
+                <mt:else>
+                document.getElementById( 'text_php' ).value = '';
+                document.getElementById( 'text' ).value = '';
+                </mt:IfUseAce>
+                no_input = true;
+            }
+        }
+    }
+</script>
+</mt:IfUseAce>
+
+<div id="text_php-wrapper"
+    <mt:if name="show_evalphp">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+    <mtapp:setting
+        id="text_php"
+        label_class="text-top"
+        label="<__trans phrase="PHP Code">"
+        show_hint="0"
+        show_label="1">
+<mt:IfUseAce>
+<div id="php-editor-div" style="height: <mt:var name="ace_editor_height" escape="html">; width: 100%;"><mtIgnore><mt:var name="text_php" escape="html"></mtIgnore></div>
+</mt:IfUseAce>
+
+        <textarea name="text_php" id="text_php" style="width:100%;height:320px" placeholder="<__trans phrase="PHP Code">" class="text full-width" ><mt:var name="text_php" escape="html"></textarea>
+
+<mt:IfUseAce>
+<script>
+    document.getElementById( 'text_php' ).style.display = 'none';
+    phpcode = document.getElementById( 'text_php' ).value;
+    if ( phpcode.match( /^<\?php/ ) == null ) {
+        phpcode = "&lt;?php\n" + phpcode;
+    }
+    document.getElementById( 'php-editor-div' ).innerHTML = phpcode;
+    var php_editor = ace.edit( 'php-editor-div' );
+    php_editor.setTheme( 'ace/theme/<mt:var name="ace_theme" escape="html">' );
+    php_editor.getSession().setMode( 'ace/mode/php' );
+    php_editor.setShowInvisibles( true );
+    document.getElementById( 'php-editor-div' ).style.fontSize = '<mt:var name="ace_font_size" escape="html">';
+    php_editor.getSession().on( 'change', function(){
+        var phpcode = php_editor.getSession().getValue();
+        phpcode = phpcode.replace( /^<\?php\n/, "" );
+        phpcode = phpcode.replace( /^<\?php/, "" );
+        phpcode = phpcode.replace( /\n\?>$/, "" );
+        document.getElementById( 'text_php' ).value = phpcode;
+        no_input = false;
+    });
+</script>
+</mt:IfUseAce>
+    </mtapp:setting>
+</div>
+
+<div id="test_mtml-wrapper"
+    <mt:if name="interval" eq="8">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+    <mtapp:setting
+        id="test_mtml"
+        label_class="text-top"
+        label="<__trans phrase="MTML for Test">"
+        show_hint="0"
+        show_label="1">
+        
+<mt:IfUseAce>
+<div id="test-editor-div" style="height: 130px; width: 100%;"><mt:var name="test_mtml" escape="html"></div>
+</mt:IfUseAce>
+
+        <textarea name="test_mtml" id="test_mtml" style="width:100%;height:130px" placeholder="<__trans phrase="MTML for Test">" class="text full-width" ><mt:var name="test_mtml" escape="html"></textarea>
+        
+        
+<mt:IfUseAce>
+<script>
+    document.getElementById( 'test_mtml' ).style.display = 'none';
+    //document.getElementById( 'test-editor-div' ).innerHTML = document.getElementById( 'test_mtml' ).value;
+    var test_editor = ace.edit( 'test-editor-div' );
+    test_editor.setTheme( 'ace/theme/<mt:var name="ace_theme" escape="html">' );
+    // or MTML
+    test_editor.getSession().setMode( 'ace/mode/<mt:var name="ace_mtml_mode" escape="html">' );
+    document.getElementById( 'test-editor-div' ).style.fontSize = '<mt:var name="ace_font_size" escape="html">';
+    test_editor.getSession().on( 'change', function(){
+        var testtextcode = test_editor.getSession().getValue();
+        document.getElementById( 'test_mtml' ).value = testtextcode;
+    });
+</script>
+</mt:IfUseAce>
+    </mtapp:setting>
+</div>
+
+<MTIgnore>
+<mt:if name="can_command">
+        <mtapp:setting
+            id="evalscript"
+            label_class="top-label"
+            label="<__trans phrase="Script Code">"
+            show_hint="0"
+            show_label="0">
+    <mt:if name="config.AllowPerlScript">
+            <label><input type="checkbox" value="1" id="evalscript" name="evalscript" <mt:if name="evalscript">checked="checked"</mt:if> 
+            onchange="toggle_placeholder( this );select_php( this );toggle_php();
+            initialize_tag();<mt:IfUseAce>change_editor_mode( this )</mt:IfUseAce>"
+            /> <__trans phrase="Eval Script"></label>
+            
+            <MTIgnore><__trans phrase="Eval Perl script"></MTIgnore>
+            
+            <input type="hidden" value="0" name="evalscript" />
+    </mt:if>
+    <mt:if name="config.AllowPHPScript">
+            <span id="evalphp-wrapper"
+            <mt:if name="interval" eq="8">
+            style="display:inline;position:absolute;left:-3000px;"
+            <mt:else>
+            style="display:none;position:absolute;left:-3000px;"
+            </mt:if>
+            >
+            &nbsp; 
+            <label><input type="checkbox" value="1" id="evalphp" name="evalphp" <mt:if name="evalphp">checked="checked"</mt:if>
+            onclick="select_php( this );"
+            /> <__trans phrase="Eval PHP script"></label>
+            <input type="hidden" value="0" name="evalphp" />
+            </span>
+    </mt:if>
+        </mtapp:setting>
+</mt:if>
+</MTIgnore>
+
+<script type="text/javascript">
+    if ( ( document.getElementById( 'text' ).value == '' ) && ( document.getElementById( 'text_php' ).value == '' ) ) {
+        no_input = true;
+    }
+</script>
+
+    <mtapp:setting
+        id="interval"
+        label_class="text-top"
+        label="<__trans phrase="Execution Type">"
+        show_hint="0"
+        show_label="1">
+    <div style="line-height:2em;">
+        <label><input type="radio" name="interval" id="interval0"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );toggle_template( 'priority-wrapper','none' );
+            toggle_template( 'evalphp-wrapper','none' );toggle_php();toggle_template( 'requires_login-wrapper','none' );
+            toggle_template( 'test_mtml-wrapper','none' );initialize_tag();
+            toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="0" <mt:unless name="interval">checked="checked"</mt:unless> /> <__trans phrase="None"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval1"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="1" <mt:if name="interval" eq="1">checked="checked"</mt:if> /> <__trans phrase="Every time"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval2"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on_date','inline' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="2" <mt:if name="interval" eq="2">checked="checked"</mt:if> /> <__trans phrase="One time"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval3"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on_date','none' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="3" <mt:if name="interval" eq="3">checked="checked"</mt:if> /> <__trans phrase="Hourly"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval4"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on_date','none' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="4" <mt:if name="interval" eq="4">checked="checked"</mt:if> /> <__trans phrase="Daily"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval5"
+            onclick="toggle_template( 'detail-wrapper','block' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on_date','none' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="5" <mt:if name="interval" eq="5">checked="checked"</mt:if> /> <__trans phrase="Weekly"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval6"
+            onclick="toggle_template( 'detail-wrapper','block' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on_date','none' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="6" <mt:if name="interval" eq="6">checked="checked"</mt:if> /> <__trans phrase="Monthly"></label>
+            <br />
+        <label><input type="radio" name="interval" id="interval7"
+            onclick="toggle_template( 'detail-wrapper','block' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on-wrapper','none' );toggle_template( 'tagkind-wrapper','none' );
+            toggle_template( 'priority-wrapper','block' );toggle_template( 'evalphp-wrapper','none' );
+            toggle_php();toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );change_editor_mode( 'evalscript' );"
+            value="7" <mt:if name="interval" eq="7">checked="checked"</mt:if> /> <__trans phrase="Callback"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval8"
+            onclick="toggle_template( 'detail-wrapper','block' );toggle_template( 'nextrun_on-wrapper','block' );
+            toggle_template( 'nextrun_on-wrapper','none' );toggle_template( 'tagkind-wrapper','block' );
+            toggle_template( 'priority-wrapper','none' );toggle_template( 'evalphp-wrapper','inline' );
+            toggle_php();select_php();toggle_template( 'requires_login-wrapper','none' );
+            toggle_template( 'test_mtml-wrapper','block' );initialize_tag();
+            toggle_template( 'app_ref-wrapper','none' );toggle_perl( false );
+            change_editor_mode( 'evalscript' );"
+            value="8" <mt:if name="interval" eq="8">checked="checked"</mt:if> /> <__trans phrase="MT Tag"></label>
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval9"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );toggle_template( 'priority-wrapper','none' );
+            toggle_template( 'evalphp-wrapper','none' );toggle_php();
+            toggle_template( 'requires_login-wrapper','block' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );
+            toggle_perl( false );
+            change_editor_mode( 'evalscript' );"
+            value="9" <mt:if name="interval" eq="9">checked="checked"</mt:if> /> <__trans phrase="Application"></label>
+
+            <label id="default_mode_label" <mt:if name="interval" eq="9"><mt:else>style="display:none;"</mt:if>>( <input type="checkbox" value="1" id="is_default" name="is_default" <mt:if name="is_default">checked="checked"</mt:if> 
+            /> <__trans phrase="Default Handler"> )</label>
+            <input type="hidden" value="0" name="is_default" />
+            &nbsp; 
+        <label><input type="radio" name="interval" id="interval10"
+            onclick="toggle_template( 'detail-wrapper','block' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );toggle_template( 'priority-wrapper','none' );
+            toggle_template( 'evalphp-wrapper','none' );toggle_php();
+            toggle_template( 'requires_login-wrapper','block' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','inline' );toggle_perl( false );
+            change_editor_mode( 'evalscript' );"
+            value="10" <mt:if name="interval" eq="10">checked="checked"</mt:if> /> <__trans phrase="Method"></label>
+        <span id="app_ref-wrapper"
+        style="display: <mt:if name="interval" eq="10">inline<mt:else>none</mt:if>">
+            <select name="app_ref" id="app_ref" style="width:128px">
+              <mt:loop name="apps_loop">
+                    <option value="<mt:var name="app_name">" <mt:if name="app_ref" eq="$app_name">selected="selected"</mt:if>><mt:var name="label"></option>
+              </mt:loop>
+            </select>
+        </span>
+        &nbsp; 
+        <mt:if name="mt_version_id" like="/^5/">
+        <mt:elseif name="mt_version_id" like="/^4/">
+        <mt:else>
+        <label><input type="radio" name="interval" id="interval11"
+            onclick="toggle_template( 'detail-wrapper','inline' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );toggle_template( 'priority-wrapper','none' );
+            toggle_template( 'evalphp-wrapper','none' );toggle_php();
+            toggle_template( 'requires_login-wrapper','block' );toggle_template( 'test_mtml-wrapper','none' );toggle_perl( false ); initialize_tag();change_editor_mode( 'evalscript' );
+            toggle_template( 'app_ref-wrapper','none' );"
+            value="11" <mt:if name="interval" eq="11">checked="checked"</mt:if> /> <__trans phrase="Data API Endpoint"></label>
+        &nbsp; </mt:if>
+        <label><input type="radio" name="interval" id="interval12"
+            onclick="toggle_template( 'detail-wrapper','none' );toggle_template( 'nextrun_on-wrapper','none' );
+            toggle_template( 'tagkind-wrapper','none' );toggle_template( 'priority-wrapper','none' );
+            toggle_template( 'evalphp-wrapper','none' );toggle_php();
+            toggle_template( 'requires_login-wrapper','none' );toggle_template( 'test_mtml-wrapper','none' );
+            initialize_tag();toggle_template( 'app_ref-wrapper','none' );change_editor_mode( this );
+            toggle_perl( true );"
+            value="12" <mt:if name="interval" eq="12">checked="checked"</mt:if> /> config.yaml</label>
+    </div>
+    </mtapp:setting>
+<div id="tagkind-wrapper"
+    <mt:if name="interval" eq="8">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+    <mtapp:setting
+        id="tagkind"
+        label_class="text-top"
+        label="<__trans phrase="Kind of MT Tag">"
+        show_hint="0"
+        show_label="0">
+        <label><input type="radio" name="tagkind" onclick="initialize_tag()"
+            value="function" <mt:if name="tagkind" eq="function">checked="checked"</mt:if>
+            <mt:unless name="tagkind">checked="checked"</mt:unless>
+             /> <__trans phrase="Function Tag"></label>
+            &nbsp; 
+        <label><input type="radio" name="tagkind" onclick="initialize_tag()"
+            value="block" <mt:if name="tagkind" eq="block">checked="checked"</mt:if> /> <__trans phrase="Block Tag"></label>
+            &nbsp; 
+        <label><input type="radio" name="tagkind" onclick="initialize_tag()"
+            value="conditional" <mt:if name="tagkind" eq="conditional">checked="checked"</mt:if> /> <__trans phrase="Conditional Tag"></label>
+            &nbsp; 
+        <label><input type="radio" name="tagkind" onclick="initialize_tag()"
+            value="modifier" <mt:if name="tagkind" eq="modifier">checked="checked"</mt:if> /> <__trans phrase="Global Modifier"></label>
+    </mtapp:setting>
+</div>
+
+<div id="detail-wrapper"
+    <mt:if name="interval" eq="5">
+    style="display:block"
+    <mt:elseif name="interval" eq="6">
+    style="display:block"
+    <mt:elseif name="interval" eq="7">
+    style="display:block"
+    <mt:elseif name="interval" eq="8">
+    style="display:block"
+    <mt:elseif name="interval" eq="10">
+    style="display:block"
+    <mt:elseif name="interval" eq="11">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+    <mtapp:setting
+        id="detail"
+        label_class="text-top"
+        label="<__trans phrase="Detail"> (<__trans phrase="Separated by commas if you want to specify more than one preference">) "
+        show_hint="0"
+        show_label="1">
+    <input type="text" name="detail" id="detail" class="text full-width" value="<mt:var name="detail" escape="html">" />
+    <a href="javascript:void(0)" onclick="
+    if ( document.getElementById( 'detail_help' ).style.display == 'none' ) {
+        document.getElementById( 'detail_help' ).style.display = 'block';
+    } else {
+        document.getElementById( 'detail_help' ).style.display = 'none'
+    }
+    "><img src="<$mt:var name="static_uri"$>images/chromeless/nav_help.png" width="6" height="15" alt="<__trans phrase="Help">" /></a>
+
+    <div id="detail_help" style="display:none">
+        <div class="hint" style="width:100%">
+        <__trans phrase="Weekly"> : <__trans phrase="Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6">
+        </div>
+        <div class="hint" style="width:100%">
+        <__trans phrase="Monthly"> : <__trans phrase="It can specify a number from 1 to 31(or 'LAST').">
+        </div>
+        <div class="hint" style="width:100%">
+        <__trans phrase="Callback"> : <__trans phrase="It can specify MT's callback name(s).Example: 'cms_post_save.entry'">
+        </div>
+        <div class="hint" style="width:100%">
+        <__trans phrase="MT Tag"> : <__trans phrase="It can specify MTML Tag Name(It is not possible to specify multiple).Example: 'MTHello' =&gt; 'Hello'">
+        </div>
+        <div class="hint" style="width:100%">
+        <__trans phrase="Method"> : <__trans phrase="It can specify Application's Method Name.Example: '__mode=hello' =&gt; 'hello'">
+        </div>
+        <div class="hint" style="width:100%">
+        <__trans phrase="Data API Endpoint"> : <br /> 
+        <__trans phrase="It can specify requestt method and route(It is not possible to specify multiple).Example: GET /v[_1]/sites/1/hello =&gt; 'GET,/sites/:site_id/hello'" params="<mt:var name="app_version">"></div>
+    </div>
+    </mtapp:setting>
+</div>
+
+<div id="nextrun_on-wrapper"
+    <mt:if name="interval" eq="0">
+    style="display:none"
+    <mt:elseif name="interval" eq="1">
+    style="display:none"
+    <mt:elseif name="interval" eq="7">
+    style="display:none"
+    <mt:elseif name="interval" eq="8">
+    style="display:none"
+    <mt:elseif name="interval" eq="9">
+    style="display:none"
+    <mt:elseif name="interval" eq="10">
+    style="display:none"
+    <mt:elseif name="interval" eq="11">
+    style="display:none"
+    <mt:elseif name="interval" eq="12">
+    style="display:none"
+    <mt:else>
+    style="display:block"
+    </mt:if>
+>
+    <mtapp:setting
+        id="nextrun_on"
+        label="<__trans phrase="Start after">"
+        label_class="text-top"
+        show_label="1">
+        <div class="date-time-fields">
+        <input
+    <mt:if name="interval" eq="2">
+    style="display:inline"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+type="text" id="nextrun_on_date" class="text date text-date highlight" name="nextrun_on_date" value="<mt:var name="nextrun_on_date" escape="html">" /><span class="separator"> <__trans phrase="@"></span> <input type="text" class="text time highlight" name="nextrun_on_time" id="nextrun_on_time" value="<$mt:var name="nextrun_on_time" escape="html"$>" />
+        </div>
+    </mtapp:setting>
+</div>
+
+<div id="requires_login-wrapper"
+    <mt:if name="interval" eq="9">
+    style="display:block"
+    <mt:elseif name="interval" eq="10">
+    style="display:block"
+    <mt:elseif name="interval" eq="11">
+    style="display:block"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+        <mtapp:setting
+            id="requires_login"
+            label_class="text-top"
+            label="<__trans phrase="Auth">"
+            show_hint="0"
+            show_label="1">
+            <label><input type="checkbox" value="1" id="requires_login" name="requires_login" <mt:if name="requires_login">checked="checked"</mt:if> 
+            /> <__trans phrase="Requires Login"></label>
+            <input type="hidden" value="0" name="requires_login" />
+    </mtapp:setting>
+</div>
+
+<div id="priority-wrapper"
+    <mt:if name="interval" eq="8">
+    style="display:none"
+    <mt:elseif name="interval" eq="9">
+    style="display:none"
+    <mt:elseif name="interval" eq="10">
+    style="display:none"
+    <mt:elseif name="interval" eq="11">
+    style="display:none"
+    <mt:elseif name="interval" eq="12">
+    style="display:none"
+    <mt:else>
+    style="display:block"
+    </mt:if>
+>
+    <mtapp:setting
+        id="priority"
+        label_class="text-top"
+        label="<__trans phrase="Priority">"
+        show_hint="0"
+        show_label="1">
+        <select name="priority" id="priority">
+            <option value="1" <mt:if name="priority" eq="1">selected="selected"</mt:if>>1</option>
+            <option value="2" <mt:if name="priority" eq="2">selected="selected"</mt:if>>2</option>
+            <option value="3" <mt:if name="priority" eq="3">selected="selected"</mt:if>>3</option>
+            <option value="4" <mt:if name="priority" eq="4">selected="selected"</mt:if>>4</option>
+            <option value="5" <mt:if name="priority" eq="5">selected="selected"</mt:if>>5</option>
+            <option value="6" <mt:if name="priority" eq="6">selected="selected"</mt:if>>6</option>
+            <option value="7" <mt:if name="priority" eq="7">selected="selected"</mt:if>>7</option>
+            <option value="8" <mt:if name="priority" eq="8">selected="selected"</mt:if>>8</option>
+            <option value="9" <mt:if name="priority" eq="9">selected="selected"</mt:if>>9</option>
+            <option value="10" <mt:if name="priority" eq="10">selected="selected"</mt:if>>10</option>
+        </select>
+    &nbsp;
+    <a href="javascript:void(0)" onclick="
+    if ( document.getElementById( 'priority_help' ).style.display == 'none' ) {
+        document.getElementById( 'priority_help' ).style.display = 'inline';
+    } else {
+        document.getElementById( 'priority_help' ).style.display = 'none';
+    }
+    "><img src="<$mt:var name="static_uri"$>images/chromeless/nav_help.png" width="6" height="15" alt="<__trans phrase="Help">" /></a>
+        &nbsp;
+        <span class="hint" id="priority_help" style="display:none;"><__trans phrase="They will be executed in the order from the smallest number."></span>
+    </mtapp:setting>
+</div>
+    <mtapp:setting
+        id="status"
+        label_class="text-top"
+        label="<__trans phrase="Status">"
+        show_hint="0"
+        show_label="0">
+<mt:if name="can_command">
+    <mt:if name="config.AllowPerlScript">
+            <label><input type="checkbox" value="1" id="evalscript" name="evalscript" <mt:if name="evalscript">checked="checked"</mt:if>  <mt:if name="interval" eq="12">disabled="disabled" checked="checked"</mt:if> 
+            onchange="toggle_placeholder( this );select_php( this );toggle_php();
+            initialize_tag();<mt:IfUseAce>change_editor_mode( this )</mt:IfUseAce>"
+            /> <__trans phrase="Eval Script"></label>
+            <MTIgnore><__trans phrase="Eval Perl script"></MTIgnore>
+            <input type="hidden" value="0" name="evalscript" />
+    </mt:if>
+    <mt:if name="config.AllowPHPScript">
+            <span id="evalphp-wrapper"
+            <mt:if name="interval" eq="8">
+            style="display:inline;position:absolute;left:-3000px;"
+            <mt:else>
+            style="display:none;position:absolute;left:-3000px;"
+            </mt:if>
+            >
+            &nbsp; 
+            <label><input type="checkbox" value="1" id="evalphp" name="evalphp" <mt:if name="evalphp">checked="checked"</mt:if>
+            onclick="select_php( this );"
+            /> <__trans phrase="Eval PHP script"></label>
+            <input type="hidden" value="0" name="evalphp" />
+            </span>
+    </mt:if>
+    &nbsp; &nbsp; &nbsp; &nbsp;
+</mt:if>
+
+        <label><__trans phrase="Status"> : &nbsp; 
+        <select name="status" id="status">
+            <option value="1" <mt:if name="status" eq="1">selected="selected"</mt:if>><__trans phrase="Disabled"></option>
+            <option value="2" <mt:if name="status" eq="2">selected="selected"</mt:if>><__trans phrase="Enabled"></option>
+        </select></label>
+
+        &nbsp; &nbsp; &nbsp;
+        <label><__trans phrase="Basename"> : <input type="text" name="basename" id="basename" class="text path" value="<mt:var name="basename" escape="html">" placeholder="<__trans phrase="Basename">" /></label>
+    </mtapp:setting>
+
+<mt:if name="lastrun_on">
+    <mtapp:setting
+        id="lastrun_on"
+        label_class="text-top"
+        label="<__trans phrase="Last run">"
+        show_hint="0"
+        show_label="1">
+        <mt:var name="lastrun_on">
+        <label><input type="checkbox" name="reset_lastrun_on" value="1"
+        <mt:if name="reset_lastrun_on">checked="checked"</mt:if>
+        > <__trans phrase="Reset Last run time"></label>
+    </mtapp:setting>
+</mt:if>
+
+<mt:if name="evalscript">
+    <mt:if name="check_evalscript">
+    <script type="text/javascript">
+        document.getElementById( 'evalscript' ).checked = true;
+    </script>
+    </mt:if>
+</mt:if>
+
+<mt:if name="use_revision">
+  <mtapp:setting
+     id="revision-note"
+     label="<__trans phrase="Change note">"
+     label_class="text-top">
+    <input type="text" name="revision-note" id="revision-note" class="text full" value="<mt:var name="revision-note" escape="html">"<mt:if name="save_revision" eq="0"> style="display:none"</mt:if> />
+  </mtapp:setting>
+</mt:if>
+
+    <button
+        type="submit"
+        accesskey="s"
+        <mt:if name="require_change_note">
+        onclick="
+            if ( no_input == false ) {
+                if ( document.getElementById( 'revision-note' ).value == '' ) {
+                    alert( '<__trans phrase="Please enter a change note.">' );
+                    document.getElementById( 'revision-note' ).focus();
+                    return false;
+                }
+            }
+            getByID( 'this_mode' ).value='save';
+        "
+        </mt:if>
+        title="<__trans phrase="Save this Custom Handler (s)">"
+        class="save action primary-button primary button"
+        ><__trans phrase="Save"></button>
+    <mt:if name="config.DoCommandInPreview">
+    <button
+        onclick="
+            jQuery( 'input[name=_type]' ).val( 'mtmljob' );
+            jQuery( 'input[name=__mode]' ).val( 'preview_mtmljob' );
+            rnd = Math.floor( Math.random() * 100 );
+            jQuery(this.form).attr( 'target','preview' + rnd);
+            this.form.submit();
+            jQuery( 'input[name=_type]' ).val( 'mtmljob' );
+            jQuery( 'input[name=__mode]' ).val( 'save' );
+            jQuery(this.form).removeAttr( 'target' );
+            return false;
+        "
+        type="submit"
+        accesskey="r"
+        title="<__trans phrase="Preview this Custom Handler (r)">"
+        class="action button"
+        ><__trans phrase="Preview"></button>
+
+    <mt:unless name="php_preview_url">
+        <mt:setvarblock name="php_preview_url"><MTCGIPath>mt-preview-tag.php</mt:setvarblock>
+    </mt:unless>
+
+<span id="php_preview-wrapper"
+    <mt:if name="show_evalphp">
+    style="display:inline"
+    <mt:else>
+    style="display:none"
+    </mt:if>
+>
+<mt:if name="can_command">
+    <button
+        onclick="
+            jQuery( 'input[name=_type]' ).val( 'mtmljob' );
+            jQuery( 'input[name=__mode]' ).val( 'preview_mtmljob' );
+            rnd = Math.floor( Math.random() * 100 );
+            jQuery(this.form).attr( 'target','preview' + rnd);
+            jQuery(this.form).attr( 'action','<mt:var name="php_preview_url">' );
+            this.form.submit();
+            jQuery( 'input[name=_type]' ).val( 'mtmljob' );
+            jQuery( 'input[name=__mode]' ).val( 'save' );
+            jQuery(this.form).removeAttr( 'target' );
+            jQuery(this.form).attr( 'action','<mt:var name="script_url">' );
+            return false;
+        "
+        type="submit"
+        title="<__trans phrase="Preview this Custom Handler (PHP)">"
+        class="action button"
+        ><__trans phrase="Preview (PHP)"></button>
+    </mt:if>
+</mt:if>
+</span>
+    <mt:if name="id">
+    <button
+        onclick="
+        if ( window.confirm( '<__trans phrase="Are you sure you want to remove this Custom Handler?">' ) ) {
+            getByID( 'this_mode' ).value='delete';
+            getByID( 'this_return_args' ).value='__mode=list&amp;_type=mtmljob&amp;blog_id=<mt:var name="blog_id">';
+            this.form.submit();
+        } else {
+            return false;
+        }
+        "
+        type="submit"
+        accesskey="x"
+        title="<__trans phrase="Delete this Custom Handler (x)">"
+        class="delete action button"
+        ><__trans phrase="Delete"></button>
+    </mt:if>
+</fieldset>
+</form>
+<mt:include name="include/footer.tmpl">
+</__trans_section>

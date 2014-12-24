@@ -1,0 +1,44 @@
+<mt:if name="tagkind" ne="modifier">sub {
+    my ( $ctx, $args, $cond ) = @_;
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
+    my $tag_name = '<mt:var name="tag_name">';
+    require MT::FileMgr;
+    my $fmgr = MT::FileMgr->new( 'Local' );
+    my $template = $fmgr->get_data( $tmpl );
+    if ( ( ref $args ) eq 'HASH' ) {
+        for my $key ( keys %$args ) {
+            if ( $key ne '@' ) {
+                $ctx->{ __stash }{ vars }{ $tag_name . '.' . $key } = $args->{ $key };
+            }
+        }
+    }
+    my $build = MT::Builder->new;
+    my $tokens = $build->compile( $ctx, $template )
+        or return $ctx->error( $component->translate(
+            'Parse error: [_1]', $build->errstr ) );
+    defined( my $out = $build->build( $ctx, $tokens ) )
+        or return $ctx->error( $component->translate(
+            'Build error: [_1]', $build->errstr ) );
+    $out;
+}<mt:else>
+sub {
+    my ( $text, $arg ) = @_;
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my $tag_name = '<mt:var name="tag_name">';
+    my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
+    require MT::FileMgr;
+    my $fmgr = MT::FileMgr->new( 'Local' );
+    my $template = $fmgr->get_data( $tmpl );
+    $ctx->{ __stash }{ vars }{ $tag_name . '.text' } = $text;
+    $ctx->{ __stash }{ vars }{ $tag_name . '.arg' } = $arg;
+    my $build = MT::Builder->new;
+    my $tokens = $build->compile( $ctx, $template )
+        or return $ctx->error( $component->translate(
+            'Parse error: [_1]', $build->errstr ) );
+    defined( my $out = $build->build( $ctx, $tokens ) )
+        or return $ctx->error( $component->translate(
+            'Build error: [_1]', $build->errstr ) );
+    $out;
+}
+</mt:if>

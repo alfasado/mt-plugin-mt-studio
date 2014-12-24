@@ -1,0 +1,20 @@
+<mt:setvarblock name="system_msg" append="1">
+<__trans_section component="Developer">
+    <div id="msg-container">
+    <mt:if name="request.saved_deleted">
+        <mtapp:statusmsg
+            id="saved-deleted"
+            class="success">
+            <__trans phrase="The Alt Template(s) has been deleted from the database.">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="request.installed">
+        <mtapp:statusmsg
+            id="saved"
+            class="success">
+            <__trans phrase="Member Site's Templates has been installed.">
+        </mtapp:statusmsg>
+    </mt:if>
+    </div>
+</__trans_section>
+</mt:setvarblock>

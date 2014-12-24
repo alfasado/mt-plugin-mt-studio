@@ -1,0 +1,11 @@
+<?php
+function smarty_function_mt<mt:var name="plugin_key">script ( $args, &$ctx ) {
+    $app = $ctx->stash( 'bootstrapper' );
+    if (! $app ) {
+        $app = $ctx->mt;
+    }
+    $script = $app->config( '<mt:var name="plugin_id">Script' );
+    if ( $script ) return $script;
+    return 'mt-<mt:var name="plugin_key">.cgi';
+}
+?>

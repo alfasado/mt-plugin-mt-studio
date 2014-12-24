@@ -1,0 +1,176 @@
+package <mt:var name="plugin_id">::CMS;
+use strict;
+
+sub template_param_edit_object {
+    my ( $cb, $app, $param, $tmpl ) = @_;
+    my $cb_name = $cb->name;
+    $cb_name =~ s/^.*\.edit_//;
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my $pointer_node = $tmpl->getElementById( 'pointer_node' );
+    return unless $pointer_node;
+    my $model = MT->model( $cb_name );
+    my $column_defs = $model->column_defs;
+    $param->{ class_label } = $model->class_label;
+    my @show_cols = $model->show_columns;
+    my $blog = $app->blog || undef;
+    if ( my $id = $app->param( 'id' ) ) {
+        if ( my $obj = $model->load( $id ) ) {
+            my $next = $obj->_nextprev( 'next' );
+            if ( $next ) {
+                $param->{ next_id } = $next->id;
+            }
+            my $previous = $obj->_nextprev( 'previous' );
+            if ( $previous ) {
+                $param->{ previous_id } = $previous->id;
+            }
+        }
+    }
+    for my $key ( @show_cols ) {
+        my $def = $column_defs->{ $key };
+        my ( $type, $label, $length );
+        if ( ( ref $def ) eq 'HASH' ) {
+            $label = $def->{ label };
+            $type = $def->{ type };
+            $length = $def->{ size };
+        } else {
+            $type = $def;
+            $label = uc( $key );
+            ( $type, $length ) = split( /\s/, $type );
+            if ( $length ) {
+                $length =~ s/^[0-9]//g;
+            }
+        }
+        my $input_type = 'text';
+        my $show_label = 1;
+        if ( $type eq 'datetime' ) {
+            $input_type = 'datetime';
+            my $datetime = $param->{ $key };
+            if (! $datetime ) {
+                my @tl = MT::Util::offset_time_list( time, $blog );
+                $datetime = sprintf '%04d%02d%02d%02d%02d%02d',
+                    $tl[ 5 ] + 1900, $tl[ 4 ] + 1, @tl[ 3, 2, 1, 0 ];
+            }
+            my $date = substr( $datetime, 0, 4 ) .
+                '-' . substr( $datetime, 4, 2 ) .
+                '-' . substr( $datetime, 6, 2 );
+            my $time = substr( $datetime, 8, 2 ) .
+                ':' . substr( $datetime, 10, 2 ) .
+                ':' . substr( $datetime, 12, 2 );
+            $param->{ $key . '_date' } = $date;
+            $param->{ $key . '_time' } = $time;
+        } elsif ( $type eq 'boolean' ) {
+            $input_type = 'checkbox';
+            $show_label = 0;
+        } elsif ( $type eq 'text' ) {
+            $input_type = 'textarea';
+        } elsif ( $type eq 'integer' ) {
+            $input_type = 'integer';
+        } elsif ( $type eq 'string' ) {
+            if ( $length && ( $length > 500 ) ) {
+                $input_type = 'textarea';
+            }
+        }
+        if (! $label ) {
+            if ( $key eq 'created_on' ) {
+                $label = MT->translate( 'Date Created' );
+            } else {
+                $label = uc( $key );
+            }
+        } else {
+            $label = MT->translate( $label );
+        }
+        my $inner = _build_field( $key, $input_type, $type, $label );
+        if ( ( $key eq 'title' ) || ( $key eq 'label' ) || ( $key eq 'name' ) ) {
+            $show_label = 0;
+        }
+        my $options_node = $tmpl->createElement( 'app:setting', {
+            id => $key,
+            label => $component->translate( $label ),
+            show_label => $show_label,
+            label_class => 'top-label'
+        } );
+        $options_node->innerHTML( $inner );
+        $tmpl->insertAfter( $options_node, $pointer_node );
+        $pointer_node = $options_node;
+    }
+    $param->{ search_label } = MT->translate( 'Entry' );
+    $param->{ search_type } = 'entry';
+    $param->{ screen_group } = $cb_name;
+}
+
+sub cms_pre_save_object {
+    my ( $cb, $app, $obj, $original ) = @_;
+    my @date_cols = qw();
+    my $cb_name = $cb->name;
+    $cb_name =~ s/^.*\.//;
+    my $column_defs = MT->model( $cb_name )->column_defs;
+    if ( $obj->has_column( 'modified_on' ) ) {
+        my @tl = MT::Util::offset_time_list( time, undef );
+        my $ts = sprintf '%04d%02d%02d%02d%02d%02d', $tl[ 5 ] + 1900, $tl[ 4 ] + 1, @tl[ 3, 2, 1, 0 ];
+        $obj->modified_on( $ts );
+    }
+    if ( $obj->has_column( 'modified_by' ) ) {
+        $obj->modified_by( $app->user->id );
+    }
+    for my $key ( keys %$column_defs ) {
+        my $def = $column_defs->{ $key };
+        my $type = $def;
+        if ( ( ref $def ) eq 'HASH' ) {
+            $type = $def->{ type };
+        }
+        if ( $type eq 'datetime' ) {
+            push ( @date_cols, $key );
+        }
+    }
+    for my $col ( @date_cols ) {
+        if ( my $date =  $app->param( $col . '_date' ) ) {
+            my $time =  $app->param( $col . '_time' ) || '00:00:00';
+            $date =~ s/[^0-9]//g;
+            $time =~ s/[^0-9]//g;
+            $obj->$col( $date . $time );
+        }
+    }
+    return 1;
+}
+
+sub _build_field {
+    my ( $name, $type, $real_type, $label ) = @_;
+    my $field;
+    if ( $type eq 'text' ) {
+        my $title = '';
+        my $placeholder = '';
+        if ( ( $name eq 'title' ) || ( $name eq 'label' ) || ( $name eq 'name' ) ) {
+            $title = 'title ';
+            $placeholder = $label;
+        }
+        $field = qq{
+            <input type="text" name="${name}" id="${name}" class="${title}text full-width" value="<_mt:var name="${name}" escape="html">" placeholder="${placeholder}" />
+        };
+    } elsif ( $type eq 'textarea' ) {
+        my $style = '';
+        if ( $real_type eq 'text' ) {
+            $style = 'style="height:240px"';
+        }
+        $field = qq{
+            <textarea ${style} type="text" name="${name}" id="${name}" class="text low full-width"><_mt:var name="${name}" escape="html"></textarea>
+        };
+    } elsif ( $type eq 'datetime' ) {
+        $field = qq{
+    <div class="date-time-fields">
+      <input type="text" id="${name}" class="text date text-date" name="${name}_date" value="<_mt:var name="${name}_date" escape="html">" /><span class="separator"> <__trans phrase="@"></span> <input type="text" class="text time" name="${name}_time" value="<_mt:var name="${name}_time" escape="html">" />
+    </div>
+        };
+    } elsif ( $type eq 'checkbox' ) {
+        $field = qq{
+            <label><input type="checkbox" name="${name}" id="${name}" class="cb" <_mt:if name="${name}">checked="checked"</mt:if> value="1" /> ${label}</label>
+            <input type="hidden" name="${name}" value="0" />
+        };
+    } elsif ( $type eq 'integer' ) {
+        $field = qq{
+            <input type="text" name="${name}" id="${name}" class="text num path" value="<_mt:var name="${name}" escape="html">" />
+        };
+    }
+    return $field;
+}
+
+1;

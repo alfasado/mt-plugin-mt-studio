@@ -1,0 +1,948 @@
+name: MT Studio
+id:   Developer
+key:  developer
+author_name: Alfasado Inc.
+author_link: http://alfasado.net/
+description: <__trans phrase="It extends the capabilities of Movable Type developers.">
+version: 1.0
+schema_version: 0.292
+l10n_class: Developer::L10N
+system_config_template: config.tmpl
+object_types:
+    mtmljob: Developer::MTMLJob
+    property: Developer::Property
+    alttemplate: Developer::AltTemplate
+    customschema: Developer::CustomSchema
+customfield_objects:
+    mtmljob:
+        context: system
+        order: 10000
+    alttemplate:
+        context: system
+        order: 10002
+listing_screens:
+    mtmljob:
+        object_label: Custom Handlers
+        primary: title
+        default_sort_key: modified_on
+        condition: >
+                sub {
+                    if ( MT->instance->blog ) {
+                        MT->instance->return_to_dashboard();
+                    }
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+    alttemplate:
+        object_label: Alt Templates
+        primary: name
+        default_sort_key: name
+        condition: >
+                sub {
+                    if ( MT->instance->blog ) {
+                        MT->instance->return_to_dashboard();
+                    }
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+    customschema:
+        object_label: Custom Schema
+        primary: name
+        default_sort_key: modified_on
+        condition: >
+                sub {
+                    if ( MT->instance->blog ) {
+                        MT->instance->return_to_dashboard();
+                    }
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+list_actions:
+    mtmljob: $developer::Developer::Listing::_list_actions
+    alttemplate: $developer::Developer::Listing::_list_actions_alt_tmpl
+    log: $developer::Developer::Listing::_list_actions_log
+    customschema: $developer::Developer::Listing::_list_actions_customschema
+system_filters:
+    mtmljob: $developer::Developer::Listing::_system_filters
+    alttemplate: $developer::Developer::Listing::_system_filters_alttemplate
+list_properties:
+    log:
+        id:
+            label: ID
+            base: __virtual.id
+            display: optional
+            order: 1
+    mtmljob:
+        id:
+            label: ID
+            base: __virtual.id
+            display: optional
+            order: 1
+        priority:
+            label: Priority
+            base: __virtual.id
+            display: optional
+            order: 4
+        basename:
+            label: Basename
+            base: __virtual.id
+            display: optional
+            order: 12
+        status:
+            label: Status
+            base: __virtual.single_select
+            display: optional
+            order: 20
+            single_select_options: >
+                sub {
+                        [
+                        {   label => MT->translate( 'Enabled' ),
+                            text  => 'Enabled',
+                            value => 2,
+                        },
+                        {   label => MT->translate( 'Disabled' ),
+                            text  => 'Disabled',
+                            value => 1,
+                        },
+                    ],
+                    }
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return $obj->status_text;
+                }
+        interval:
+            label: Execution Type
+            base: __virtual.single_select
+            display: force
+            order: 6
+            single_select_options: $developer::Developer::Listing::_mtmljob_trigger_options
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return $obj->interval_text_short;
+                }
+        detail:
+            label: Detail
+            base: __virtual.id
+            display: optional
+            order: 10
+        tagkind:
+            label: Kind of MT Tag
+            base: __virtual.single_select
+            display: optional
+            order: 11
+            single_select_options: $developer::Developer::Listing::_mtmljob_tagkind_options
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return $obj->tagkind_text;
+                }
+        nextrun_on:
+            base: __virtual.created_on
+            label: Run on
+            display: optional
+            order: 8
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    my $nextrun_on = $obj->nextrun_on;
+                    if (! $nextrun_on ) {
+                        return '-';
+                    }
+                    my $interval = $obj->interval;
+                    if ( ( defined $interval ) && ( $interval == 2 ) ) {
+                        return MT::Util::format_ts( '%Y-%m-%d@%H:%M:%S', $nextrun_on );
+                    }
+                    if ( $interval == 0 ) {
+                        return '-';
+                    }
+                    return MT::Util::format_ts( '@%H:%M:%S', $nextrun_on );
+                }
+        app_ref:
+            label: Application
+            base: __virtual.id
+            display: optional
+            order: 8
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    if (! $obj->app_ref ) {
+                        return '-';
+                    }
+                    return $obj->app_ref;
+                }
+        lastrun_on:
+            base: __virtual.created_on
+            label: Last run
+            display: optional
+            order: 0
+        modified_on:
+            base: __virtual.modified_on
+            label: Last Modified
+            display: optional
+            order: 9
+        created_by:
+            label: Created by
+            base: __virtual.id
+            display: optional
+            order: 10
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return MT::Util::encode_html( $obj->author->nickname );
+                }
+        title:
+            label: Name
+            base: __virtual.title
+            display: force
+            order: 2
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    my $name = MT::Util::encode_html( $obj->title
+                        || MT->translate( 'Untitled' ) . '(id:' . $obj->id . ')' );
+                    my $edit_link = $app->uri(
+                        mode => 'view',
+                        args => { _type => 'mtmljob',
+                                  id => $obj->id, } );
+                    my $static = MT->config( 'StaticWebPath' );
+                    my $option = '';
+                    my ( $status_icon, $eval_icon, $php_icon );
+                    if ( $obj->status == 2 ) {
+                        $status_icon = $static . '/images/status_icons/success.gif';
+                    } else {
+                        $status_icon = $static . '/images/status_icons/draft.gif';
+                    }
+                    if ( $obj->evalscript ) {
+                        $eval_icon = $static . '/plugins/Developer/images/evalscript.png';
+                        $eval_icon = " &nbsp; <img src=\"$eval_icon\" width=\"12\" height=\"12\" />"
+                    } else {
+                        $eval_icon = '';
+                    }
+                    if ( $obj->evalphp && ( $obj->interval == 8 ) ) {
+                        $php_icon = $static . '/plugins/Developer/images/evalphp.png';
+                        $php_icon = " &nbsp; <img src=\"$php_icon\" width=\"20\" height=\"20\" />"
+                    } else {
+                        $php_icon = '';
+                    }
+                    return qq{
+                        <img src="$status_icon" /> &nbsp; <a href="$edit_link">$name</a> $eval_icon $php_icon
+                    };
+                    return qq{
+                        <a href="$edit_link">$name</a>
+                    };
+                }
+        evalscript:
+            label: Eval Code
+            base: __virtual.single_select
+            display: none
+            single_select_options: >
+                sub {
+                    my $component = MT->component( 'Developer' );
+                    return [
+                        {   label => $component->translate( 'Allowed' ),
+                            text  => 'Allowed',
+                            value => 1,
+                        },
+                        {   label => $component->translate( 'Not Allowed' ),
+                            text  => 'Not Allowed',
+                            value => 0,
+                        },
+                    ],
+                    }
+    alttemplate:
+        name:
+            label: Name
+            base: __virtual.title
+            display: force
+            order: 2
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    my $name = MT::Util::encode_html( $obj->name
+                        || MT->translate( 'Untitled' ) . '(id:' . $obj->id . ')' );
+                    my $edit_link = $app->uri(
+                        mode => 'view',
+                        args => { _type => 'alttemplate',
+                                 id => $obj->id, } );
+                    my $icon = MT->config( 'StaticWebPath' );
+                    if ( $obj->status == 2 ) {
+                        $icon .= '/images/status_icons/success.gif';
+                    } else {
+                        $icon .= '/images/status_icons/draft.gif';
+                    }
+                    return qq{
+                        <img src="$icon" /> &nbsp; <a href="$edit_link">$name</a>
+                    };
+                }
+        id:
+            label: ID
+            base: __virtual.id
+            display: option
+            order: 1
+        status:
+            label: Status
+            base: __virtual.single_select
+            display: optional
+            order: 20
+            single_select_options: >
+                sub {
+                        [ {   label => MT->translate( 'Enabled' ),
+                            text  => 'Enabled',
+                            value => 2,
+                          },
+                          {   label => MT->translate( 'Disabled' ),
+                            text  => 'Disabled',
+                            value => 1,
+                          }, ],
+                    }
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return $obj->status_text;
+                }
+        app_ref:
+            label: Application
+            base: __virtual.id
+            display: optional
+            order: 6
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    if (! $obj->app_ref ) {
+                        return MT->translate( 'All' );
+                    }
+                    return $obj->app_ref;
+                }
+        template:
+            label: Template
+            base: __virtual.id
+            display: force
+            order: 7
+        created_by:
+            label: Created by
+            base: __virtual.id
+            display: optional
+            order: 10
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    return MT::Util::encode_html( $obj->author->nickname );
+                }
+        modified_on:
+            base: __virtual.modified_on
+            label: Last Modified
+            display: optional
+            order: 9
+    customschema:
+        author:
+            base: __virtual.id
+            display: optional
+            label: 'Author Name'
+            order: 50
+        created_by:
+            base: __virtual.author_name
+            display: optional
+            label: 'Author'
+            order: 110
+        created_on:
+            base: __virtual.created_on
+            display: optional
+            label: 'Date Created'
+            order: 90
+        haslist:
+            base: __virtual.id
+            display: optional
+            label: Listing
+            order: 80
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    if ( $obj->haslist ) {
+                        return MT->translate( 'Enabled' );
+                    } else {
+                        return MT->translate( 'Disabled' );
+                    }
+                }
+        id:
+            base: __virtual.id
+            display: option
+            label: ID
+            order: 1
+        name:
+            base: __virtual.title
+            display: force
+            label: 'Plugin ID'
+            order: 2
+            html: >
+                sub { 
+                    my ( $prop, $obj, $app ) = @_;
+                    my $name = MT::Util::encode_html( $obj->name
+                        || MT->translate( 'Untitled' ) . '(id:' . $obj->id . ')' );
+                    my $edit_link = $app->uri(
+                        mode => 'create_your_own_object',
+                        args => { id => $obj->id, blog_id => 0 } );
+                    return qq{
+                        <a href="$edit_link">$name</a>
+                    };
+                }
+        label:
+            base: __virtual.id
+            display: optional
+            label: Label
+            order: 17
+        plural:
+            base: __virtual.id
+            display: optional
+            label: 'Localized Label'
+            order: 18
+        lang_id:
+            base: __virtual.id
+            display: optional
+            label: Language
+            order: 40
+        modified_by:
+            base: __virtual.author_name
+            display: optional
+            label: 'Modified by'
+            order: 120
+        modified_on:
+            base: __virtual.modified_on
+            label: Last Modified
+            display: optional
+            order: 100
+        module_id:
+            base: __virtual.id
+            display: optional
+            label: 'Module ID'
+            order: 15
+        pluginver:
+            base: __virtual.id
+            display: optional
+            label: Version
+            order: 20
+        schemaver:
+            base: __virtual.id
+            display: optional
+            label: 'Schema Version'
+            order: 30
+applications:
+    cms:
+        methods:
+            preview_mtmljob: $developer::Developer::CMS::_preview_mtmljob
+            change_status_jobs: $developer::Developer::CMS::_change_status_jobs
+            change_status_alttemplate: $developer::Developer::CMS::_change_status_alttemplate
+            install_sign_in_template: $developer::Developer::CMS::_install_sign_in_template
+            throw_sql: $developer::Developer::CMS::_throw_sql
+            set_ace_settings_as_default: $developer::Developer::CMS::_set_ace_settings_as_default
+            mtmljob_export_plugin: $developer::Developer::CMS::_mtmljob_export_plugin
+            mtmljobs_to_plugin: $developer::Developer::CMS::_mtmljobs_to_plugin
+            customschemas_to_plugin: $developer::Developer::CMS::_customschemas_to_plugin
+            disable_customhandlers: $developer::Developer::CMS::_recover_developer
+            disable_alttemplates: $developer::Developer::CMS::_recover_developer
+            disable_mtstudio: $developer::Developer::CMS::_recover_developer
+            export_alttemplates: $developer::Developer::CMS::_export_alttemplates
+            show_revision_diff: $developer::Developer::CMS::_show_revision_diff
+            export_studio_player: $developer::Developer::CMS::_export_studio_player
+            create_your_own_object: $developer::Developer::CMS::_create_object
+            export_plugin: $developer::Developer::CMS::_export_plugin_popup
+        menus:
+            mtmljob:
+                label: Custom Handlers
+                order: 751
+            mtmljob:list_mtmljob:
+                label: Manage
+                order: 1
+                mode: list
+                args:
+                    _type: mtmljob
+                view: system
+                condition: >
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+            mtmljob:create_mtmljob:
+                label: New
+                order: 2
+                mode: view
+                args:
+                    _type: mtmljob
+                view: system
+                condition: >
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+            design:list_alttemplate:
+                label: Alt Template
+                order: 9999
+                mode: list
+                args:
+                    _type: alttemplate
+                view: system
+                condition: >
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+            tools:throw_sql:
+                label: Throw SQL
+                mode: throw_sql
+                order: 7000
+                view: system
+                condition: >
+                        sub { 
+                            if ( MT->config( 'AllowThrowSQL' ) ) {
+                                return 1 if MT->instance->user->is_superuser;
+                            }
+                            return 0;
+                        }
+            #tools:create_your_own_object:
+            #    label: Schema Builder
+            #    mode: create_your_own_object
+            #    order: 300
+            #    view: system
+            #    condition: >
+            #            sub { 
+            #                return 1 if MT->instance->user->is_superuser;
+            #                return 0;
+            #            }
+            customschema:
+                label: Custom Schema
+                order: 770
+            customschema:list_customschema:
+                label: Manage
+                order: 1
+                mode: list
+                args:
+                    _type: customschema
+                view: system
+                condition: >
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+            customschema:create_customschema:
+                label: New
+                order: 2
+                mode: create_your_own_object
+                view: system
+                condition: >
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+        content_actions:
+            alttemplate: $developer::Developer::Listing::_content_actions
+    developer:
+        handler: MT::App::Developer
+        script: sub { MT->config->DeveloperScript }
+        methods:
+            default: $developer::MT::App::Developer::default
+            start_recover: $developer::MT::App::Developer::start_recover
+            recover: $developer::MT::App::Developer::recover
+            new_pw: $developer::MT::App::Developer::new_pw
+            signup: $developer::MT::App::Developer::signup
+            do_signup: $developer::MT::App::Developer::do_signup
+            do_register: $developer::MT::App::Developer::do_register
+            logout: $developer::MT::App::Developer::logout
+            edit_profile:
+                code: $developer::MT::App::Developer::edit_profile
+                requires_login: 1
+            save_profile:
+                code: $developer::MT::App::Developer::save_profile
+                requires_login: 1
+            withdraw:
+                code: $developer::MT::App::Developer::withdraw
+                requires_login: 1
+            # edit_profile: $developer::MT::App::Developer::edit_profile
+            # save_profile: $developer::MT::App::Developer::save_profile
+            # withdraw: $developer::MT::App::Developer::withdraw
+    data_api:
+        endpoints:
+              - id: data_api_get_logs
+                handler: $developer::Developer::DataAPI::_handler_data_api_get_logs
+                requires_login: 1
+                route: '/sites/:site_id/logs'
+                verb: GET
+                version: 1
+              - id: mtmlcompile
+                handler: $developer::Developer::DataAPI::_handler_mtmlcompile
+                requires_login: 1
+                route: '/sites/:site_id/mtml_compile'
+                verb: POST
+                version: 1
+        resources:
+            log:
+                fields:
+                    - id
+                    - message
+                    - ip
+                    - blog_id
+                    - author_id
+                    - level
+                    - author_id
+                    - category
+                    - metadata
+                    - created_on
+settings:
+    developer_signup_notify_to:
+    developer_job_use_ace:
+        default: 1
+    developer_ace_theme:
+        default: cobalt
+    developer_ace_font_size:
+        default: 14px
+    developer_ace_editor_height:
+        default: 500px
+    developer_ace_mtml_mode:
+        default: xml
+    developer_preview_php:
+    developer_mtmljob_default_status:
+        default: 1
+    developer_alttemplate_default_status:
+        default: 1
+    developer_default_evalscript:
+        default: 1
+    developer_default_mtmljob_status:
+        default: 2
+    developer_default_alttemplate_status:
+        default: 2
+    developer_plugin_author_name:
+        default: Alfasado Inc.
+    developer_plugin_author_link:
+        default: http://alfasado.net/
+    developer_plugin_initial_version:
+        default: 0.1
+    developer_data_api_version:
+        default: v1
+    developer_data_api_endpoint:
+    developer_recover_password:
+        default: Magic
+    developer_php_path:
+    require_change_note:
+        default: 0
+config_settings:
+    DoCommandInPreview:
+        default: 1
+        updatable: 1
+    Query2LogDebugMode:
+        default: 0
+        updatable: 1
+    Query2LogAtError:
+        default: 0
+        updatable: 1
+    SpeedMeterDebugScope:
+        default: log
+        updatable: 1
+    Content2Gzip:
+        default: 0
+        updatable: 1
+    Dynamic2Gzip:
+        default: 0
+        updatable: 1
+    Content2GzipExtensions:
+        default: html,js,css
+        updatable: 1
+    RemoveExifAtUploadImage:
+        default: 0
+        updatable: 1
+    AllowIncludeParentDir:
+        default: 0
+        updatable: 1
+    AllowPerlScript:
+        default: 1
+        updatable: 1
+    AllowPHPScript:
+        default: 1
+        updatable: 1
+    TranslateComponent:
+        default: Developer
+        updatable: 1
+    CanWriteTo:
+        default: ''
+        updatable: 1
+    # any
+    CanReadFrom:
+        default: ''
+        updatable: 1
+    # any
+    PathToRelative:
+        default: 1
+        updatable: 1
+    ForceTargetOutLink:
+        default: 0
+        updatable: 1
+    AllowCreateObject:
+        default: ''
+        updatable: 1
+    AllowThrowSQL:
+        default: 1
+        updatable: 1
+    DeveloperScript:
+        default: mt-app.cgi
+        updatable: 1
+    DeveloperRegistration:
+        default: 1
+        updatable: 1
+    OnetimeTokenTTL:
+        default: 600
+        updatable: 1
+    CustomHandlerMaxRevisions:
+        default: 50
+        updatable: 1
+    SystemTemplateMaxRevisions:
+        default: 20
+        updatable: 1
+    AltTemplateMaxRevisions:
+        default: 20
+        updatable: 1
+callbacks:
+    post_init:
+        handler: $developer::Developer::Callbacks::_post_init
+        priority: 1    
+    init_app:
+        handler: $developer::Developer::Callbacks::_init_plugin
+        priority: 1
+    init_request:
+        handler: $developer::Developer::Callbacks::_init_plugin
+        priority: 5
+    pre_run:
+        - handler: $developer::Developer::Callbacks::_pre_run
+          priority: 1
+    post_run:
+        - handler: $developer::Developer::Callbacks::_post_run_debug
+          priority: 1
+    MT::App::CMS::take_down: $developer::Developer::Callbacks::_reset_request
+    MT::App::CMS::template_param.dashboard: $developer::Developer::CMS::_dashboard_message
+    MT::App::CMS::template_source.dashboard: $developer::Developer::CMS::_dashboard_message
+    MT::App::CMS::template_param.edit_template: $developer::Developer::CMS::_cb_edit_template
+    cms_pre_save.template: $developer::Developer::CMS::_cms_pre_save_template
+    cms_pre_save.alttemplate: $developer::Developer::CMS::_cms_pre_save_alttemplate
+    cms_post_delete.entry: $developer::Developer::Callbacks::_cms_post_delete_entry
+    template_param.error: $developer::Developer::Callbacks::_error
+    MT::Log::post_save: $developer::Developer::Callbacks::_error_log
+    build_file: $developer::Developer::Callbacks::_cb_gzip
+    post_delete_archive_file: $developer::Developer::Callbacks::_cb_delete_archive
+    MT::App::CMS::cms_upload_image:
+        - handler: $developer::Developer::Callbacks::_cb_remove_exif
+          priority: 10
+    build_file_filter: $developer::Developer::Callbacks::_build_file_filter
+    MT::App::CMS::template_param.edit_mtmljob: $developer::Developer::CMS::_edit_mtmljob_param
+    MT::App::CMS::template_param.edit_alttemplate: $developer::Developer::CMS::_edit_alttemplate_param
+    cms_post_save.mtmljob: 
+        - handler: $developer::Developer::Callbacks::_save_cf_callback
+          priority: 1
+        - handler: $developer::Developer::CMS::_post_save_mtmljob
+          priority: 10
+    cms_post_save.alttemplate: 
+        - handler: $developer::Developer::Callbacks::_save_cf_callback
+        - handler: $developer::Developer::CMS::_post_save_alttemplate
+    cms_post_delete.mtmljob: $developer::Developer::CMS::_post_delete_object
+    cms_post_delete.alttemplate: $developer::Developer::CMS::_post_delete_object
+    cms_save_filter.mtmljob: $developer::Developer::CMS::_cms_save_filter_mtmljob
+    cms_save_filter.alttemplate: $developer::Developer::CMS::_cms_save_filter_alttemplate
+    cms_pre_save.mtmljob: $developer::Developer::CMS::_pre_save_mtmljob
+    cms_save_permission_filter.mtmljob: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+    cms_delete_permission_filter.mtmljob: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+    cms_save_permission_filter.property: sub { return undef; }
+    cms_delete_permission_filter.property: sub { return undef; }
+    MT::App::CMS::template_param.list_revision: $developer::Developer::CMS::_add_params_to_revision
+    MT::App::CMS::template_source.list_revision: $developer::Developer::CMS::_set_revision_title
+    MT::App::CMS::template_output.list_revision: $developer::Developer::CMS::_set_revision_title
+    MT::App::CMS::template_source.revision_table: $developer::Developer::CMS::_add_column_to_revision
+    MT::App::CMS::template_source.edit_entry: $developer::Developer::CMS::_add_link_to_revision
+    MT::App::CMS::template_source.edit_template: $developer::Developer::CMS::_add_link_to_revision
+    MT::App::CMS::template_source.edit_alttemplate: $developer::Developer::CMS::_add_link_to_revision
+    app_pre_listing_list_revision: $developer::Developer::CMS::_pre_listing_revision
+    # MT::App::Developer::template_source.error: $developer::MT::App::Developer::alt_tmpl
+    # MT::App::Developer::template_source.login: $developer::MT::App::Developer::alt_tmpl
+    MT::App::Developer::template_source.login: 
+        handler: $developer::MT::App::Developer::_login_tmpl
+        priority: 1
+    MT::App::Developer::template_source.error: 
+        handler: $developer::MT::App::Developer::_error_tmpl
+        priority: 1
+    cms_pre_save.customschema: $developer::Developer::CMS::_cms_pre_save_customschema
+    cms_save_permission_filter.customschema: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+    cms_delete_permission_filter.customschema: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+tasks:
+    ScheduledMTMLJob:
+        label: Scheduled Custom Handlers
+        frequency: 60
+        code: $developer::Developer::Tools::_scheduled_job
+        priority: 10
+    RemoveOldOnetimetoken:
+        label: Remove Old Onetimetoken
+        frequency: 240
+        code: $developer::Developer::Tools::_remove_old_onetimetoken
+        priority: 5
+tags:
+    block:
+      # Static(Perl)only
+        PerlScript: $developer::Developer::Tags::_hdlr_perlscript
+        CMSContext: $developer::Developer::Tags::_hdlr_cms_context
+        IfModule?: $developer::Developer::Tags::_hdlr_if_module
+        IfComponent?: $developer::Developer::Tags::_hdlr_if_component
+        IfUseAce?: $developer::Developer::Tags::_hdlr_if_useace
+      # MTApp:
+        AppStatusMsg: MT::Template::Tags::App::_hdlr_app_setting
+        AppSetting: MT::Template::Tags::App::_hdlr_app_setting
+        AppWidget: MT::Template::Tags::App::_hdlr_app_widget
+        AppListing: MT::Template::Tags::App::_hdlr_app_statusmsg
+        AppSettingGroup: MT::Template::Tags::App::_hdlr_app_setting_group
+        AppForm: MT::Template::Tags::App::_hdlr_app_form
+      # Static(Perl) and Dynamic(PHP)
+        CountGroupBy: $developer::Developer::Tags::_hdlr_count_group_by
+        IfRequestMethod?: $developer::Developer::Tags::_hdlr_if_request_method
+        IfEntryIsinCategory?: $developer::Developer::Tags::_hdlr_entry_is_in_category
+        SetPropertyBlock: $developer::Developer::Tags::_hdlr_set_property_block
+        CacheProperty: $developer::Developer::Tags::_hdlr_cache_property
+        IfProperty?: $developer::Developer::Tags::_hdlr_if_property
+        EvalScript: $developer::Developer::Tags::_hdlr_perlscript
+        FileInfo: $developer::Developer::Tags::_hdlr_file_info
+        FileInfoLoop: $developer::Developer::Tags::_hdlr_file_info
+        CSSCompressor: $developer::Developer::Tags::_hdlr_css_compressor
+        JSCompressor: $developer::Developer::Tags::_hdlr_js_compressor
+        HTMLCompressor: $developer::Developer::Tags::_hdlr_html_compressor
+        IfCookie?: $developer::Developer::Tags::_hdlr_if_cookie
+        IfUserRole?: $developer::Developer::Tags::_hdlr_if_user_role
+        IfUserCan?: $developer::Developer::Tags::_hdlr_if_user_can
+        IfHeader?: $developer::Developer::Tags::_hdlr_if_header
+        IfLanguage?: $developer::Developer::Tags::_hdlr_if_language
+        IfRegexMatch?: $developer::Developer::Tags::_hdlr_if_regex_match
+        SetContext: $developer::Developer::Tags::_hdlr_set_context
+        ClearContext: $developer::Developer::Tags::_hdlr_clear_context
+        IfTheURLFound?: $developer::Developer::Tags::_hdlr_if_the_url_found
+        IfValidateMagic?: $developer::Developer::Tags::_hdlr_if_validate_magic
+        IfValidToken?: $developer::Developer::Tags::_hdlr_if_valid_token
+      # Dynamic(PHP)only
+        PHPScript: sub{ return ''; }
+    function:
+      # Static(Perl)only
+        RebuildBlog: $developer::Developer::Tags::_hdlr_rebuild_blog
+        RebuildIndexById: $developer::Developer::Tags::_hdlr_rebuild_indexbyid
+        RebuildIndexByBlogId: $developer::Developer::Tags::_hdlr_rebuild_indexbyblogid
+        Rebuild: $developer::Developer::Tags::_hdlr_rebuild
+      # Command Tags
+        CreateObject: $developer::Developer::Tags::_hdlr_create_object
+        SetUserRole: $developer::Developer::Tags::_hdlr_set_user_role
+        RunCallbacks: $developer::Developer::Tags::_hdlr_run_callbacks
+      # Static(Perl) and Dynamic(PHP)
+      # Command Tags
+        ThrowSQL: $developer::Developer::Tags::_hdlr_throw_sql
+        SendMail: $developer::Developer::Tags::_hdlr_send_mail
+        CopyFileTo: $developer::Developer::Tags::_hdlr_copy_file_to
+        CopyDirectoryTo: $developer::Developer::Tags::_hdlr_copy_file_to
+        MoveFileTo: $developer::Developer::Tags::_hdlr_move_file_to
+        MoveDirectoryTo: $developer::Developer::Tags::_hdlr_move_file_to
+        WriteToFile: $developer::Developer::Tags::_hdlr_write_to_file
+        ReadFromFile: $developer::Developer::Tags::_hdlr_read_from_file
+        RemoveFile: $developer::Developer::Tags::_hdlr_remove_file
+        RemoveDirectory: $developer::Developer::Tags::_hdlr_remove_directory
+        MLJob: $developer::Developer::Tags::_hdlr_ml_job
+        CustomHandler: $developer::Developer::Tags::_hdlr_ml_job
+        Redirect: $developer::Developer::Tags::_hdlr_redirect
+      # Function Tags
+        DeveloperScript: sub { MT->config->DeveloperScript }
+        GetOnetimeToken: $developer::Developer::Tags::_hdlr_get_onetimetoken
+        RequestMethod: $developer::Developer::Tags::_hdlr_request_method
+        MLJobTitle: $developer::Developer::Tags::_hdlr_ml_job_title
+        MLJobName: $developer::Developer::Tags::_hdlr_ml_job_title
+        CustomHandlerTitle: $developer::Developer::Tags::_hdlr_ml_job_title
+        CustomHandlerName: $developer::Developer::Tags::_hdlr_ml_job_title
+        SetColumns2Vars: $developer::Developer::Tags::_hdlr_set_columns2vars
+        SetFields2Vars: $developer::Developer::Tags::_hdlr_set_columns2vars
+        CountGroupValue: $developer::Developer::Tags::_hdlr_count_group_value
+        CountGroupCount: $developer::Developer::Tags::_hdlr_count_group_count
+        SetProperty: $developer::Developer::Tags::_hdlr_set_property
+        GetProperty: $developer::Developer::Tags::_hdlr_get_property
+        DeleteProperty: $developer::Developer::Tags::_hdlr_delete_property
+        Build: $developer::Developer::Tags::_hdlr_build
+        BuildLink: $developer::Developer::Tags::_hdlr_build_link
+        GetEnv: $developer::Developer::Tags::_hdlr_get_env
+        GetCookie: $developer::Developer::Tags::_hdlr_get_cookie
+        GetHeader: $developer::Developer::Tags::_hdlr_get_header
+        SetCookie: $developer::Developer::Tags::_hdlr_setcookie
+        ClearCookie: $developer::Developer::Tags::_hdlr_clearcookie
+        VarDump: $developer::Developer::Tags::_hdlr_vardump
+        CookieDump: $developer::Developer::Tags::_hdlr_cookiedump
+        QueryDump: $developer::Developer::Tags::_hdlr_querydump
+        EnvDump: $developer::Developer::Tags::_hdlr_envdump
+        Query2Log: $developer::Developer::Tags::_hdlr_query2log
+        SpeedMeter: $developer::Developer::Tags::_hdlr_speedmeter
+        GetEpoc: $developer::Developer::Tags::_hdlr_get_epoc
+        AssetThumbnailFile: $developer::Developer::Tags::_hdlr_asset_thumbnail_file
+        Log: $developer::Developer::Tags::_hdlr_log
+        Translate: $developer::Developer::Tags::_hdlr_translate
+        GetURLMtime: $developer::Developer::Tags::_hdlr_get_url_mtime
+        MagicToken: $developer::Developer::Tags::_hdlr_magic_token
+    modifier:
+        convert2base64: $developer::Developer::Tags::_filter_convert2base64
+        setproperty: $developer::Developer::Tags::_filter_setproperty
+        outiftheurlfound: $developer::Developer::Tags::_filter_outiftheurlfound
+search_apis:
+    mtmljob:
+        label: Custom Handler
+        condition: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+        handler: $developer::Developer::CMS::_search_mtmljobs
+        can_replace: 0
+        order: 680
+        can_search_by_date: 0
+        search_cols:
+            title: Title
+            text: Text
+            text_php: PHP
+            detail: Details
+        results_table_template: include/mtmljob_table.tmpl
+    alttemplate:
+        label: Alt Template
+        condition: >
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+        handler: $developer::Developer::CMS::_search_alttemplate
+        can_replace: 0
+        order: 690
+        can_search_by_date: 0
+        search_cols:
+            name: Name
+            text: Text
+        results_table_template: include/alttemplate_table.tmpl
+custom_handlers:
+    my_handler:
+        code: $developer::Developer::Tools::_app_test
+        requires_login: 1
+        class: 9
+        # detail: 
+        # app_ref: MT::App::Developer
+
+## TODO: Dynamic Load CustomSchema(add status)
+## TODO: Export CustomSchema from Listing Screen(Select Multiple Schema)

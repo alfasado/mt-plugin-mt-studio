@@ -1,0 +1,4 @@
+    $mt = MT::get_instance();
+    $ctx =& $mt->context();
+    $src = $ctx->stash( 'developer_modifier_modifier_id_<ID>' );
+    return eval( $src );

@@ -1,0 +1,54 @@
+<mt:if name="task">sub {
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
+    require MT::FileMgr;
+    my $fmgr = MT::FileMgr->new( 'Local' );
+    my $template = $fmgr->get_data( $tmpl );
+    require MT::Template::Context;
+    require MT::Builder;
+    my $ctx = MT::Template::Context->new;
+    my $build = MT::Builder->new;
+    my $tokens = $build->compile( $ctx, $template )
+        or MT->log( $component->translate(
+            'Parse error: [_1]', $build->errstr ) );
+    defined( my $out = $build->build( $ctx, $tokens ) )
+        or MT->log( $component->translate(
+            'Build error: [_1]', $build->errstr ) );
+    if ( $out ) {
+        return 1;
+    }
+    return 0;
+}
+<mt:else>
+<mt:if name="callback">sub {
+    my ( $cb ) = @_;
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
+    require MT::FileMgr;
+    my $fmgr = MT::FileMgr->new( 'Local' );
+    my $template = $fmgr->get_data( $tmpl );
+    require MT::Template::Context;
+    require MT::Builder;
+    my $ctx = MT::Template::Context->new;
+    my $build = MT::Builder->new;
+    my $tokens = $build->compile( $ctx, $template )
+        or MT->log( $component->translate(
+            'Parse error: [_1]', $build->errstr ) );
+    defined( my $out = $build->build( $ctx, $tokens ) )
+        or MT->log( $component->translate(
+            'Build error: [_1]', $build->errstr ) );
+    return $out;
+}<mt:else>sub {
+    <mt:if name="data_api">my ( $app, $endpoint ) = @_;<mt:else>my $app = shift;</mt:if>
+    my $component = MT->component( '<mt:var name="plugin_id">' );
+    my %param;
+    my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
+<mt:if name="data_api">    my $data = $app->build_page( $tmpl, \%param );
+    $data =~ s/\r|\n|\t//g;
+    my $format = $app->current_format;
+    eval {
+        $data = $format->{ unserialize }->( $data );
+    };
+    return $data;
+<mt:else>    return $app->build_page( $tmpl, \%param );
+</mt:if>}</mt:if></mt:if>

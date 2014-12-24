@@ -1,0 +1,42 @@
+<__trans_section component="Developer">
+<mt:setvarblock name="page_title"><__trans phrase="Throw a SQL query"></mt:setvarblock>
+<mt:include name="include/header.tmpl">
+<mt:if name="page_msg">
+<mtapp:statusmsg id="zero-state" class="success">
+<p><__trans phrase="Processing time"> : <mt:var name="processing_time"></p>
+<textarea class="text" style="height:320px;width:97%"><$mt:var name="page_msg" escape="html"$></textarea>
+</mtapp:statusmsg>
+</mt:if>
+<mt:if name="error_msg">
+<mtapp:statusmsg id="zero-state" class="error zero-state">
+<$mt:var name="error_msg" escape="html"$>
+</mtapp:statusmsg>
+</mt:if>
+<form method="post" action="<mt:var name="script_url">">
+    <input type="hidden" name="__mode" value="throw_sql" />
+    <input type="hidden" name="_type" value="sql" />
+    <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+<fieldset>
+    <mtapp:setting
+        id="sql_request"
+        label_class="top-label"
+        label="<__trans phrase="SQL">"
+        show_hint="0"
+        show_label="1">
+    <textarea class="text" name="sql_request" style="width:97%;height:140px"><mt:var name="sql_request" escape="html"></textarea>
+    </mtapp:setting>
+    <button
+        type="submit"
+        onclick="
+        if ( window.confirm( '<__trans phrase="Are you sure you want to throw a SQL?">' ) ) {
+            this.form.submit();
+        } else {
+            return false;
+        }
+        "
+        class="save action primary-button primary button"
+        >Do!</button>
+</fieldset>
+</form>
+<mt:include name="include/footer.tmpl">
+</__trans_section>

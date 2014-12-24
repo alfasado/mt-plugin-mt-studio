@@ -1,0 +1,58 @@
+<mt:setvar name="edit_screen" value="1">
+<mt:setvarblock name="html_title"><mt:if name="id"><mt:var name="name" escape="html"> - <__trans phrase="Edit [_1]" params="<mt:var name="class_label">"><mt:else><__trans phrase="Create [_1]" params="<mt:var name="class_label">"></mt:else></mt:if></mt:setvarblock>
+<mt:setvarblock name="page_title"><mt:if name="id"><__trans phrase="Edit [_1]" params="<mt:var name="class_label">"><mt:else><__trans phrase="Create [_1]" params="<mt:var name="class_label">"></mt:if></mt:setvarblock>
+<mt:setvarblock name="system_msg">
+    <mt:if name="saved">
+        <mtapp:statusmsg
+           id="saved"
+            class="success"
+            rebuild="all">
+            <__trans phrase="Your changes have been saved.">
+        </mtapp:statusmsg>
+    </mt:if>
+    <mt:if name="error">
+        <mtapp:statusmsg
+            id="generic-error"
+            class="error">
+            <mt:var name="error">
+        </mtapp:statusmsg>
+    </mt:if>
+</mt:setvarblock>
+<mt:include name="include/header.tmpl">
+<form method="post" action="<mt:var name="script_url">" id="datasource_form">
+    <input type="hidden" name="id" value="<mt:var name="id" escape="html">" />
+    <input type="hidden" name="blog_id" value="<mt:var name="blog_id" escape="html">" />
+    <input type="hidden" name="__mode" value="save" id="this_mode" />
+    <input type="hidden" name="_type" value="datasource" />
+    <input type="hidden" name="return_args" id="this_return_args" value="<mt:var name="return_args" escape="html">" />
+    <input type="hidden" name="magic_token" value="<mt:var name="magic_token">" />
+<fieldset>
+
+<mt:ignore id="pointer_node"></mt:ignore>
+
+</fieldset>
+    <button
+        type="submit"
+        accesskey="s"
+        title="<__trans phrase="Save this [_1] (s)" params="<mt:var name="class_label">">"
+        class="save action primary-button primary button"
+        ><__trans phrase="Save"></button>
+    <mt:if name="id">
+    <button
+        onclick="
+        if ( window.confirm( '<__trans phrase="Are you sure you want to remove this [_1]?" params="<mt:var name="class_label">">' ) ) {
+            getByID( 'this_mode' ).value='delete';
+            getByID( 'this_return_args' ).value='__mode=list&amp;_type=datasource&amp;blog_id=<mt:var name="blog_id">';
+            this.form.submit();
+        } else {
+            return false;
+        }
+        "
+        type="submit"
+        accesskey="x"
+        title="<__trans phrase="Delete this [_1] (x)" params="<mt:var name="class_label">">"
+        class="delete action button"
+        ><__trans phrase="Delete"></button>
+    </mt:if>
+</form>
+<mt:include name="include/footer.tmpl">

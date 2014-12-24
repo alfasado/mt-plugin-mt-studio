@@ -1,0 +1,71 @@
+callbacks:<mt:if name="has_listing">
+    MT::App::CMS::template_param.edit_<mt:var name="datasource">: <mt:var name="plugin_id">::CMS::template_param_edit_object
+    cms_pre_save.<mt:var name="datasource">: <mt:var name="plugin_id">::CMS::cms_pre_save_object</mt:if>
+    cms_save_permission_filter.<mt:var name="datasource">: >-
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+    cms_delete_permission_filter.<mt:var name="datasource">: >-
+                sub { 
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                    return undef;
+                }
+<mt:if name="has_listing"><mt:var name="list_properties">
+listing_screens:
+    <mt:var name="datasource">:
+        object_label: <mt:var name="object_label">
+        primary: <mt:var name="primary">
+        default_sort_key: <mt:var name="default_sort_key">
+        condition: >-
+                sub {
+                    if ( MT->instance->blog ) {
+                        MT->instance->return_to_dashboard();
+                    }
+                    return 1 if MT->instance->user->is_superuser;
+                    MT->instance->return_to_dashboard();
+                }
+list_actions:
+    <mt:var name="datasource">:
+        delete:
+            button: 1
+            label: Delete
+            mode: delete
+            class: 'icon-action'
+            return_args: 1
+            args:
+                _type: <mt:var name="datasource">
+            order: 100
+applications:
+    cms:
+        menus:
+            <mt:var name="datasource">:
+                label: <mt:var name="object_label">
+                order: <mt:var name="menu_order">
+            <mt:var name="datasource">:list_<mt:var name="datasource">:
+                label: Manage
+                order: 1
+                mode: list
+                args:
+                    _type: <mt:var name="datasource">
+                view: system
+                condition: >-
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+            <mt:var name="datasource">:create_<mt:var name="datasource">:
+                label: New
+                order: 2
+                mode: view
+                args:
+                    _type: <mt:var name="datasource">
+                view: system
+                condition: >-
+                        sub { 
+                            return 1 if MT->instance->user->is_superuser;
+                            return 0;
+                        }
+</mt:if>

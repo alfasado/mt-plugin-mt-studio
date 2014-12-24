@@ -1,0 +1,10 @@
+<?php
+require_once( 'class.baseobject.php' );
+class <mt:var name="module_id"> extends BaseObject
+{
+    public $_table = 'mt_<mt:var name="datasource">';
+    protected $_prefix = "<mt:var name="datasource">_";<mt:if name="meta">
+    protected $_has_meta = TRUE;</mt:if>
+}<mt:if name="meta">
+ADODB_Active_Record::ClassHasMany('<mt:var name="module_id">', 'mt_<mt:var name="datasource">_meta','<mt:var name="datasource">_meta_<mt:var name="datasource">_id');</mt:if>
+?>
