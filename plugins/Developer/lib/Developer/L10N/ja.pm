@@ -73,7 +73,7 @@ our %Lexicon = (
     'Eval PHP script' => 'PHPスクリプトを実行する',
     'MTML' => 'MTタグ',
     'It can specify MTML Tag Name(It is not possible to specify multiple).Example: \'MTHello\' =&gt; \'Hello\'' => 'MT タグ名を指定します(複数指定はできません)。例: \'MTHello\' =&gt; \'Hello\'',
-    'It can specify requestt method and route(It is not possible to specify multiple).Example: GET /v[_1]/sites/1/hello =&gt; \'GET,/sites/:site_id/hello\'' => 'リクエストメソッドとエンドポインとのパスを指定します(複数指定はできません)。例: GET /v[_1]/sites/1/hello =&gt; \'GET,/sites/:site_id/hello\'',
+    'It can specify requestt method and route(It is not possible to specify multiple).Example: GET /v[_1]/sites/1/hello =&gt; \'GET,/sites/:site_id/hello\'' => 'リクエストメソッドとエンドポイントのパスを指定します(複数指定はできません)。例: GET /v[_1]/sites/1/hello =&gt; \'GET,/sites/:site_id/hello\'',
     'It can specify Application\'s Method Name.Example: \'__mode=hello\' =&gt; \'hello\'' => 'アプリケーションメソッド名を指定します。例: \'__mode=hello\' =&gt; \'hello\'',
     'Reset Last run time' => '最終実行時刻をリセットする',
     'They will be executed in the order from the smallest number.' => '数字の小さいものから順番に実行されます。',
