@@ -636,7 +636,7 @@ sub _hdlr_send_mail {
     # <MTSetVar name="Bcc[0]" value="bar@example.com">
     # <MTSetVar name="Bcc[1]" value="baz@alfasado.jp">
     # <MTSetVar name="options{Bcc}" value="$Bcc">
-    # <MTSendMail Subject="Subject" Body="Body" options="$options">
+    # <MTSendMail subject="Subject" body="Body" options="$options">
     return '' if cancel_command();
     require MT::Mail;
     my $head;
