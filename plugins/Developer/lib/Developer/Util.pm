@@ -200,6 +200,9 @@ sub set_object_default {
 sub set_entry_default {
     my $entry = shift;
     my $blog = $entry->blog;
+    if (! $blog ) {
+        $blog = MT::Blog->load( $entry->blog_id );
+    }
     if (! $entry->status ) {
         $entry->status( $blog->status_default );
     }

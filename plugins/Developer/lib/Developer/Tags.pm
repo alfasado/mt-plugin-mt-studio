@@ -156,6 +156,8 @@ sub _hdlr_create_object {
     $obj->set_values( $values );
     $obj = set_object_default( $ctx, $obj );
     if ( ( ( ref $obj ) eq 'MT::Entry' ) || ( ( ref $obj ) eq 'MT::Page' ) ) {
+        my $blog_id = $values->{ blog_id };
+        $obj->blog_id( $blog_id );
         $obj = set_entry_default( $obj );
     }
     my $run_callbacks = $args->{ 'callbacks' };
@@ -172,8 +174,14 @@ sub _hdlr_create_object {
     if ( $logging ) {
         my $message;
         if ( ( $obj->has_column( 'author_id' ) ) && $obj->author_id ) {
-            if ( my $author = MT->model->author( $obj->author_id ) ) {
+            if ( my $author = MT->model('author')->load( $obj->author_id ) ) {
                 $message = $component->translate( '\'[_1]\' created by \'[_2]\'', $obj->class_label, $author->name );
+            }
+        } else {
+            if ( ( ref $app ) =~ /^MT::App::/ ) {
+                if ( my $author = $app->user ) {
+                    $message = $component->translate( '\'[_1]\' created by \'[_2]\'', $obj->class_label, $author->name );
+                }
             }
         }
         if (! $message ) {
@@ -184,6 +192,16 @@ sub _hdlr_create_object {
         }
         $args->{ message } = $message;
         _hdlr_log( $ctx, $args, $cond );
+    }
+    if ( my $need_result = $args->{ need_result } ) {
+        if ( ( $need_result eq '1' ) && ( $obj->has_column( 'id' ) ) ) {
+            return $obj->id;
+        } else {
+            if ( $obj->has_column( $need_result ) || ( $need_result eq 'permalink' ) ) {
+                return $obj->$need_result;
+            }
+        }
+        return 1;
     }
     return '';
 }
