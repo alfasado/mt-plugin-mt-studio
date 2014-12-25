@@ -679,7 +679,7 @@ config_settings:
         default: ''
         updatable: 1
     AllowThrowSQL:
-        default: 1
+        default: 0
         updatable: 1
     DeveloperScript:
         default: mt-app.cgi
