@@ -212,7 +212,7 @@ sub _hdlr_set_user_role {
     if ( ( ref $app ) !~ /^MT::App::/ ) {
         return '';
     }
-    my $user = $app->user;
+    my $user; # = $app->user;
     if (! $user ) {
         if ( my $author_id = $args->{ author_id } ) {
             $user = MT->model( 'author' )->load( $author_id );
