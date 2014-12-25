@@ -819,6 +819,7 @@ sub _hdlr_read_from_file {
 sub _hdlr_write_to_file {
     my ( $ctx, $args, $cond ) = @_;
     return if cancel_command();
+    my $component = MT->component( 'Developer' );
     my $to = $args->{ to };
     if (! $to ) {
         $to = $args->{ file };
@@ -836,6 +837,17 @@ sub _hdlr_write_to_file {
     my $value = $args->{ value };
     if (! $value ) {
         $value = $args->{ content };
+    }
+    my $need_result = $args->{ need_result };
+    if ( $to && (! can_access_to( $to, $blog ) ) ) {
+        my $message = $component->translate( 'Cannot write to [_1].', $to );
+        if ( $need_result ) {
+            $ctx->error( $message );
+        } else {
+            $args->{ message } = $message;
+            _hdlr_log( $ctx, $args, $cond );
+            return '';
+        }
     }
     my $res = 0;
     if ( $args->{ append } ) {
@@ -860,7 +872,6 @@ sub _hdlr_write_to_file {
         my $fmgr = MT::FileMgr->new( 'Local' ) or die MT::FileMgr->errstr;
         $res = $fmgr->put_data( $value, $to );
     }
-    my $need_result = $args->{ need_result };
     if ( $need_result ) {
         return $res;
     }
