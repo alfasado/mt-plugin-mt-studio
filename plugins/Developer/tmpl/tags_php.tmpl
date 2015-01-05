@@ -1,6 +1,6 @@
 <mt:if name="tagkind" eq="function">
     $base = dirname( dirname( __FILE__ ) );
-    $base = "${base}/tmpl";
+    $base = "${base}/tmpl/handlers";
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     $_var_compiled = '';
     $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
@@ -14,7 +14,7 @@
     $ctx->__stash[ 'vars' ][ 'modifier_text' ] = $text;
     $ctx->__stash[ 'vars' ][ 'modifier_arg' ] = $arg;
     $base = dirname( dirname( __FILE__ ) );
-    $base = "${base}/tmpl";
+    $base = "${base}/tmpl/handlers";
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     $_var_compiled = '';
     $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
@@ -25,7 +25,7 @@
     return $_contents;<mt:else>
     $tag = $ctx->this_tag();
     $base = dirname( dirname( __FILE__ ) );
-    $base = "${base}/tmpl";
+    $base = "${base}/tmpl/handlers";
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     if ( strpos( $tag, 'mtif' ) !== FALSE ) {
         $_var_compiled = '';
