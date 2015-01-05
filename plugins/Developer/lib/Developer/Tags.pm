@@ -358,6 +358,15 @@ sub _hdlr_if_request_method {
     return MT::Template::Tags::Core::_hdlr_if( $ctx, $args, $cond );
 }
 
+sub _hdlr_request_method {
+    my ( $ctx, $args, $cond ) = @_;
+    my $app = MT->instance();
+    if ( ( ref $app ) !~ /^MT::App::/ ) {
+        return '';
+    }
+    return $app->request_method;
+}
+
 sub _hdlr_if_user_role {
     my ( $ctx, $args, $cond ) = @_;
     my $app = MT->instance();
