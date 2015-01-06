@@ -3,7 +3,17 @@
     $base = "${base}/tmpl/handlers";
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     $_var_compiled = '';
-    $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+    if ( is_array( $args ) ) {
+        $this_tag = $ctx->this_tag();
+        $this_tag = preg_replace( '/^mt/', '', $this_tag );
+        foreach( $args as $key => $value ) {
+            $ctx->__stash[ 'vars' ][ "${this_tag}.${key}" ] = $value;
+        }
+    }
+    $text = file_get_contents( $tmpl );
+    if (! $ctx->_compile_source( 'evaluated template', $text, $_var_compiled ) ) {
+        return $ctx->error( "Error compiling text '$text'" );
+    }
     ob_start();
     $ctx->_eval( '?>' . $_var_compiled );
     $_contents = ob_get_contents();
@@ -17,7 +27,10 @@
     $base = "${base}/tmpl/handlers";
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     $_var_compiled = '';
-    $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+    $text = file_get_contents( $tmpl );
+    if (! $ctx->_compile_source( 'evaluated template', $text, $_var_compiled ) ) {
+        return $ctx->error( "Error compiling text '$text'" );
+    }
     ob_start();
     $ctx->_eval( '?>' . $_var_compiled );
     $_contents = ob_get_contents();
@@ -29,7 +42,17 @@
     $tmpl = "${base}/<mt:var name="mtmljob_basename">.tmpl";
     if ( strpos( $tag, 'mtif' ) !== FALSE ) {
         $_var_compiled = '';
-        $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+        if ( is_array( $args ) ) {
+            $this_tag = $ctx->this_tag();
+            $this_tag = preg_replace( '/^mt/', '', $this_tag );
+            foreach( $args as $key => $value ) {
+                $ctx->__stash[ 'vars' ][ "${this_tag}.${key}" ] = $value;
+            }
+        }
+        $text = file_get_contents( $tmpl );
+        if (! $ctx->_compile_source( 'evaluated template', $text, $_var_compiled ) ) {
+            return $ctx->error( "Error compiling text '$text'" );
+        }
         ob_start();
         $ctx->_eval( '?>' . $_var_compiled );
         $_contents = ob_get_contents();
@@ -48,11 +71,21 @@
             $repeat = FALSE;
             $ctx->__stash[ 'vars' ][ '__content__' ] = $content;
             $_var_compiled = '';
-            $ctx->_compile_source( 'evaluated template', file_get_contents( $tmpl ), $_var_compiled );
+            if ( is_array( $args ) ) {
+                $this_tag = $ctx->this_tag();
+                $this_tag = preg_replace( '/^mt/', '', $this_tag );
+                foreach( $args as $key => $value ) {
+                    $ctx->__stash[ 'vars' ][ "${this_tag}.${key}" ] = $value;
+                }
+            }
+            $text = file_get_contents( $tmpl );
+            if (! $ctx->_compile_source( 'evaluated template', $text, $_var_compiled ) ) {
+                return $ctx->error( "Error compiling text '$text'" );
+            }
             ob_start();
             $ctx->_eval( '?>' . $_var_compiled );
             $_contents = ob_get_contents();
             ob_end_clean();
-            return $contents;
+            return $_contents;
         }
     }</mt:if>
