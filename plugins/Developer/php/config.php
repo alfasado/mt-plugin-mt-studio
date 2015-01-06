@@ -10,7 +10,7 @@ class Developer extends MTPlugin {
             'DeveloperScript' => array( 'default' => 'mt-app.cgi' ),
 //End not export
             'AllowPHPScript' => array( 'default' => 0 ),
-            'PathToRelative' => array( 'default' => 1 ),
+            'PathToRelative' => array( 'default' => 0 ),
             'CanWriteTo' => array( 'default' => '' ),
             'CanReadFrom' => array( 'default' => '' ),
             'ForceTargetOutLink' => array( 'default' => 0 ),

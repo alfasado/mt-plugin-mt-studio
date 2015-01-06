@@ -670,7 +670,7 @@ config_settings:
         updatable: 1
     # any
     PathToRelative:
-        default: 1
+        default: 0
         updatable: 1
     ForceTargetOutLink:
         default: 0
