@@ -729,7 +729,7 @@ sub _export_studio_player {
     my $author_link = $component->registry( 'author_link' );
     my $l10n_class = $plugin_id . '::L10N';
     my $description = '<__trans phrase="Helper Plugin for MT Studio.">';
-    my $meta = "name: ${name}\nid:   ${plugin_id}\nkey:  ${key}:\ndescription: ${description}\n"
+    my $meta = "name: ${name}\nid:   ${plugin_id}\nkey:  ${key}\ndescription: ${description}\n"
     . "version: ${version}\nschema_version: ${schema_version}\nl10n_class: ${l10n_class}";
     my @configs = qw( AllowPerlScript AllowThrowSQL AllowCreateObject OnetimeTokenTTL
                       PathToRelative SpeedMeterDebugScope ForceTargetOutLink );
