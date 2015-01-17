@@ -21,7 +21,8 @@
 }
 <mt:else>
 <mt:if name="callback">sub {
-    my ( $cb ) = @_;
+    my $cb = shift;
+    my @params = @_;
     my $component = MT->component( '<mt:var name="plugin_id">' );
     my $tmpl = File::Spec->catfile( $component->path, 'tmpl', 'handlers', '<mt:var name="mtmljob_basename">.tmpl' );
     require MT::FileMgr;
@@ -31,6 +32,56 @@
     require MT::Builder;
     my $ctx = MT::Template::Context->new;
     my $build = MT::Builder->new;
+    my $app = MT->instance;
+    my ( $model, $rebuild );
+    if ( $cb->method =~ m/^cms_.*?\.(.*?)$/ ) {
+        $model = $1;
+    } elsif ( $cb->method =~ m/^api_.*?\.(.*?)$/ ) {
+        $model = $1;
+    } elsif ( $cb->method =~ m/^build_.*$/ ) {
+        $rebuild = 1;
+    }
+    my $blog;
+    if ( ( ref $app ) =~ /^MT::App::/ ) {
+        if ( $app->blog ) {
+            $blog = $app->blog;
+        }
+    }
+    if ( $model ) {
+        my $obj = $params[ 1 ];
+        my $original = $params[ 2 ];
+        if ( defined $obj ) {
+            my $ds = $obj->datasource;
+            $ctx->stash( $ds, $obj );
+            if (! $blog ) {
+                if ( ( $obj->has_column( 'blog_id' ) ) && ( $obj->blog_id ) ) {
+                    require MT::Blog;
+                    $blog = MT::Blog->load( $obj->blog_id );
+                }
+            }
+            if ( $obj->has_column( 'status' ) ) {
+                $ctx->{ __stash }{ vars }{ new_status } = $obj->status;
+            }
+        }
+        if ( defined $original ) {
+            if ( $original->has_column( 'status' ) ) {
+                $ctx->{ __stash }{ vars }{ old_status } = $original->status;
+            }
+        }
+    }
+    if ( $blog ) {
+        $ctx->stash( 'blog', $blog );
+        $ctx->stash( 'blog_id', $blog->id );
+    }
+    if ( $rebuild ) {
+        my %args = @_;
+        if ( my $context = $args{ Context } ) {
+            $ctx = $context;
+        }
+        if ( my $file = $args{ File } ) {
+            $ctx->{ __stash }{ vars }{ publishing_file } = $file;
+        }
+    }
     my $tokens = $build->compile( $ctx, $template )
         or MT->log( $component->translate(
             'Parse error: [_1]', $build->errstr ) );
