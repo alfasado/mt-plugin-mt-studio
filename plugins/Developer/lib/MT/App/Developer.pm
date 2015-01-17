@@ -214,6 +214,7 @@ sub do_signup {
         my $website = MT->model( 'website' )->load( undef,{ limit => 1 } );
         $app->param( 'blog_id', $website->id );
         $param->{ blog_id } = $website->id;
+        $blog = $website;
     }
     my $user = $app->create_user_pending( $param ) if $filter_result;
     if (! $user ) {
@@ -428,7 +429,7 @@ sub recover {
     my $registration = MT->config( 'DeveloperRegistration' )
         or $app->handle_error( $app->translate( 'Signing up is not allowed.' ) );
     require MT::CMS::Tools;
-    MT::CMS::Tools::recover_password( @_ );
+    MT::CMS::Tools::recover_password( $app, @_ );
 }
 
 sub new_pw {
@@ -436,7 +437,7 @@ sub new_pw {
     my $registration = MT->config( 'DeveloperRegistration' )
         or $app->handle_error( $app->translate( 'Signing up is not allowed.' ) );
     require MT::CMS::Tools;
-    MT::CMS::Tools::new_password( @_ );
+    MT::CMS::Tools::new_password( $app, @_ );
 }
 
 sub redirect_to_edit_profile {
@@ -560,12 +561,10 @@ sub _tmpl {
 sub _mail {
     my ( $app, $subject, $body, $to ) = @_;
     require MT::Mail;
-    my $from_addr;
+    my $from_addr = MT->config( 'EmailAddressMain' );
     my $reply_to;
     if ( MT->config( 'EmailReplyTo' ) ) {
         $reply_to = MT->config( 'EmailAddressMain' );
-    } else {
-        $from_addr = MT->config( 'EmailAddressMain' );
     }
     if ( $to =~ /,/ ) {
         my @tos;
@@ -578,10 +577,12 @@ sub _mail {
     }
     my %head = (
         To => $to,
-        $from_addr ? ( From       => $from_addr ) : (),
-        $reply_to  ? ( 'Reply-To' => $reply_to )  : (),
+        From => $from_addr,
         Subject => $subject,
     );
+    if ( $reply_to ) {
+        $head{ 'Reply-To' } = $reply_to;
+    }
     my $charset = MT->config( 'MailEncoding' ) || MT->config( 'PublishCharset' );
     $head{ 'Content-Type' } = qq(text/plain; charset="$charset");
     MT::Mail->send( \%head, $body )

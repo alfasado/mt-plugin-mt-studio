@@ -1833,7 +1833,7 @@ CODE
         # set config.yaml and settings.
         $app_registry->{ handler } = 'MT::App::' . $plugin_id;
         $app_registry->{ script } = 'sub { MT->config->' . $plugin_id . 'Script }';
-        my @methods = qw( default start_recover new_pw signup do_signup do_register logout );
+        my @methods = qw( default start_recover recover new_pw signup do_signup do_register logout );
         for my $meth ( @methods ) {
             $app_registry->{ methods }->{ $meth } = 'MT::App::' . $plugin_id . '::' . $meth;
         }
@@ -1864,7 +1864,6 @@ CODE
         $pm = _trim( $pm );
         $lib_file = File::Spec->catfile( $php_dir,  'function.mt' . $plugin_key . 'script.php' );
         $fmgr->put_data( $pm, $lib_file );
-        
         my @app_tmpls = qw( commenter_notify email_verification_email error login profile
                             recover signup_thanks signup );
         for my $t ( @app_tmpls ) {
@@ -2053,6 +2052,8 @@ CODE
                 if ( $with_bootstrap ) {
                     $lexicon->{ 'Sign Up Notify Send To' } =
                         $component->translate( 'Sign Up Notify Send To' );
+                    $lexicon->{ 'Thanks for the confirmation. Please sign in.' } =
+                        $component->translate( 'Thanks for the confirmation. Please sign in.' );
                 }
             }
             if ( $lexicon ) {
