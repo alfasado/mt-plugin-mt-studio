@@ -191,7 +191,7 @@ sub withdraw {
     }
     my $param = {};
     $param->{ message } = $component->translate( 'You have unsubscribed from Movable Type.' );
-    return $app->login_form( $param );
+    return $app->login_form( $param, 'default' );
 }
 
 sub do_signup {
@@ -299,7 +299,7 @@ sub do_register {
     my $param = {};
     $param->{ return_url } = $return_to;
     $param->{ message } = $component->translate( 'Thanks for the confirmation. Please sign in.' );
-    $app->login_form( $param );
+    $app->login_form( $param, 'default' );
 }
 
 sub _send_registration_notification {
@@ -501,17 +501,28 @@ sub save_profile {
 sub login_form {
     my $app = shift;
     my $params = shift;
-    my $component = MT->component( 'Developer' );
+    my $mode = shift;
+    my $component = MT->component( 'RequiresLogin' );
     my $message = $params->{ message };
     delete( $params->{ message } );
     my @query_params;
-    for my $key ( keys %$params ) {
-        push ( @query_params, { key => $key, value => $params->{ $key } } );
-    }
-    my $q = $app->param;
-    my @ps = $q->param;
-    for my $key ( @ps ) {
-        push ( @query_params, { name => $key, value => $app->param( $key ) } );
+    if (! $mode ) {
+        for my $key ( keys %$params ) {
+            push ( @query_params, { key => $key, value => $params->{ $key } } );
+        }
+        my $q = $app->param;
+        my @ps = $q->param;
+        for my $key ( @ps ) {
+            push ( @query_params, { name => $key, value => $app->param( $key ) } );
+        }
+    } else {
+        push ( @query_params, { name => 'mode', value => $mode } );
+        if ( my $blog_id = $app->param( 'blog_id' ) ) {
+            push ( @query_params, { key => 'blog_id', value => $blog_id } );
+        }
+        if ( my $return_url = $app->param( 'return_url' ) ) {
+            push ( @query_params, { key => 'return_url', value => $return_url } );
+        }
     }
     $params->{ query_params } = \@query_params;
     require MT::Auth;
