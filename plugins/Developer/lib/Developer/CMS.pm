@@ -1153,7 +1153,7 @@ sub _customschemas_to_plugin {
                 $has_lexicon = 1;
             }
             $description = '<__trans phrase="' . $description . '">' if $description;
-            my $meta = "name: ${orig_name}\nid:   ${plugin_id}\nkey:  ${key}:\ndescription: ${description}\n"
+            my $meta = "name: ${orig_name}\nid:   ${plugin_id}\nkey:  ${key}\ndescription: ${description}\n"
             . "version: ${version}\nschema_version: ${schema_version}\nl10n_class: ${l10n_class}\n";
             delete( $lexicon->{ '' } );
             $config = $meta . $config;
