@@ -39,7 +39,7 @@ sub _nextprev {
     return $nextprev if defined $nextprev;
     $nextprev = $obj->nextprev(
         direction => $direction,
-        terms     => { blog_id => $obj->blog_id },
+        # terms     => { blog_id => $obj->blog_id },
         by        => 'created_on',
     );
     MT->request( "<mt:var name="datasource">_$direction:" . $obj->id, $nextprev );
