@@ -218,7 +218,7 @@ sub _create_object {
                 $default_sort_key = 'id';
             }
             my %param;
-            my $cols = _trim( __indent( Dumper( $column_defs ) ) );
+            my $cols = _trim( __indent( __indent( Dumper( $column_defs ) ) ) );
             $cols =~ s/\n\}$/\n    }/;
             my $list_propaties = {};
             if ( $audit ) {

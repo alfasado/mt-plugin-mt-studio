@@ -135,6 +135,7 @@ sub cms_pre_save_object {
 
 sub _build_field {
     my ( $name, $type, $real_type, $label ) = @_;
+    my $component = MT->component( '<mt:var name="plugin_id">' );
     my $field;
     if ( $type eq 'text' ) {
         my $title = '';
@@ -161,8 +162,9 @@ sub _build_field {
     </div>
         };
     } elsif ( $type eq 'checkbox' ) {
+        my $tanslate_label = $component->translate( $label );
         $field = qq{
-            <label><input type="checkbox" name="${name}" id="${name}" class="cb" <_mt:if name="${name}">checked="checked"</mt:if> value="1" /> ${label}</label>
+            <label><input type="checkbox" name="${name}" id="${name}" class="cb" <_mt:if name="${name}">checked="checked"</mt:if> value="1" /> ${tanslate_label}</label>
             <input type="hidden" name="${name}" value="0" />
         };
     } elsif ( $type eq 'integer' ) {
