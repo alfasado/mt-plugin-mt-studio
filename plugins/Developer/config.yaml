@@ -511,7 +511,7 @@ applications:
             #            }
             customschema:
                 label: Custom Schema
-                order: 770
+                order: 752
             customschema:list_customschema:
                 label: Manage
                 order: 1

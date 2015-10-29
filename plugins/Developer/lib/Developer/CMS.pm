@@ -228,6 +228,7 @@ sub _create_object {
                 push ( @list_keys, 'created_on' );
                 push ( @list_keys, 'modified_on' );
             }
+            my $primary_html;
             if ( scalar @list_keys ) {
                 $list_propaties->{ $datasource }->{ id } = {
                     label => 'ID',
@@ -247,6 +248,22 @@ sub _create_object {
                             display => 'force',
                             order => 2,
                         };
+                        $primary_html = <<MTML;
+>-
+                sub {
+                    my ( \$prop, \$obj, \$app ) = \@_;
+                    my \$url = \$app->uri( mode => 'view',
+                                         args => { _type => '${datasource}',
+                                                   id => \$obj->id } );
+                    my \$name = MT::Util::encode_html( \$obj->${key} );
+                    if (! \$name ) {
+                        \$name = '[Id:' . \$obj->id . ']';
+                    }
+                    return "<a href=\\"\${url}\\">\${name}</a>";
+                }
+MTML
+                        chomp( $primary_html );
+                        $list_propaties->{ $datasource }->{ $key }->{ html } = '__PRIMARY__';
                     } else {
                         my $col = $column_defs->{ $key };
                         my ( $label, $type );
@@ -303,6 +320,7 @@ sub _create_object {
             my $props = MT::Util::YAML::Dump( $propaties );
             $props =~ s/^\-{1,}//;
             $props = _trim( __indent( $props ) );
+            $props =~ s/__PRIMARY__/$primary_html/;
             $param{ column_defs } = $cols;
             $param{ menu_order } = $menu_order;
             my $idx = _trim( __indent( __indent( Dumper( $indexes ) ) ) );
